@@ -178,7 +178,7 @@ body.calm *,body.calm *::before{animation:none!important;transition:none!importa
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
-const KEY = 'cosmicAI_lesson_v2';
+const KEY = 'cosmicAI_lesson_v3';
 const fresh = () => ({name:'',xp:0,m:0,s:0,done:{},ans:{},calm:false,teacher:false});
 function load(){ try{ const r=localStorage.getItem(KEY); if(r) return Object.assign(fresh(), JSON.parse(r)); }catch(e){} return fresh(); }
 let S = load();
@@ -239,12 +239,20 @@ const CRIT=[
  {id:'lim',label:'Limits or tone: style, what to avoid',tip:'Add a tone (funny, simple) or a limit (no jargon).',test:t=>/\b(don't|do not|avoid|only|no more than|at most|limit|tone|friendly|funny|simple|formal|casual|without|must|keep it|fun|serious|jargon)\b/i.test(t)}
 ];
 
+const PRO=[
+ {label:'Step by step: asks for reasoning or stages',tip:'Add "think step by step" or "first... then...".',test:t=>/\b(step by step|step-by-step|steps|first|then|reasoning|think through|stages)\b/i.test(t)},
+ {label:'Detail: real facts about your situation',tip:'Add dates, the time you have, your level, what you struggle with.',test:t=>t.trim().split(/\s+/).length>=25},
+ {label:'Format: how the answer should look',tip:'Ask for a table, bullets, short blocks...',test:t=>/\b(table|bullets?|list|format|words|sentences?|outline|day by day|blocks|checklist)\b/i.test(t)},
+ {label:'Self-check or questions first',tip:'Add "ask me questions first" or "what could be wrong?".',test:t=>/\b(check|verify|double-check|unsure|ask me|questions|what could be|assumptions|review)\b/i.test(t)},
+ {label:'Example or separators',tip:'Add an example, or put material between ### markers.',test:t=>/(###|"""|\bexample|for instance|like this|e\.g\.)/i.test(t)}
+];
+
 const MISSIONS=[
 /* ---------- 1 ---------- */
 {icon:'🚀',name:'Launch Pad',goal:'Tell me what AI means to YOU',
- tip:'About 8 minutes. ADHD friendly setup: one task per screen, breaks in missions 4 and 7, Calm mode button for sensory comfort. Let her stand, fidget or doodle. Do not correct her first answers here: they are the "before" picture that she compares at the end.',
+ tip:'About 8 minutes. ADHD friendly setup: one task per screen, breaks in missions 5 and 8, Calm mode button for sensory comfort. Let her stand, fidget or doodle. Do not correct her first answers here: they are the "before" picture that she compares at the end.',
  steps:[
- {t:'name',title:'Welcome, space explorer! 🌠',body:`<p>Today is a mission with <b>8 short stops</b>. Tiny bits of reading, lots of buttons, lots of your opinions. You earn ✨ XP for every answer.</p><p>There are no wrong opinions here, only honest ones. First: what should I call you?</p>`},
+ {t:'name',title:'Welcome, space explorer! 🌠',body:`<p>Today is a mission with <b>9 short stops</b>. Tiny bits of reading, lots of buttons, lots of your opinions. You earn ✨ XP for every answer.</p><p>There are no wrong opinions here, only honest ones. First: what should I call you?</p>`},
  {t:'open',key:'whatAI',q:'In your own words: what is AI? Explain it to a friend who has never heard of it.',ph:'AI is...',min:15,after:'Locked in. We will check this again at the very end, to see if your answer changes.',tt:'Ask her to read it aloud. Ask: where did you learn this idea of AI (movies, friends, social media)?'},
  {t:'multi',key:'meetAI',q:'Where did you already meet AI this week? Tap all that apply.',opts:['Spotify or YouTube recommendations','TikTok or Instagram feed','Phone face unlock','Google Translate','Chatbots (Gemini, ChatGPT...)','Autocorrect and keyboard suggestions','Photo filters','Voice assistants','Video game characters','I am not sure'],min:1,after:'You are already surrounded by AI! Today you learn to steer it instead of just riding along.'},
  {t:'scale',key:'trustBefore',q:'How much do you trust what a chatbot tells you?',lo:'Not at all',hi:'Completely',after:v=>`Saved: <b>${v}/10</b>. We will measure again at the end.`},
@@ -283,6 +291,25 @@ const MISSIONS=[
  {t:'choice',q:'You want AI to write a message in your own voice. What helps most?',opts:['"Write it nicely"','Paste two messages you wrote and say "match this style"','Nothing, it already knows me','Write in ALL CAPS'],a:1,why:'<b>Show, do not just tell.</b> Examples are one of the strongest tricks you have.'},
  {t:'rewrite',key:'myPrompt',q:'Your turn! Write a prompt you would REALLY use this week. Use at least 3 ingredients.',bad:null,ph:'Write your own real prompt...',need:3,example:null,tt:'Open a chatbot and run her prompt live. Then ask for ONE improvement together.'},
  {t:'lab',key:'lab3',title:'Refine like an editor',goal:'Prompting is a conversation. Practice improving an answer with a follow-up.',steps:['Send YOUR OWN prompt from the last step to a chatbot.','Read the answer. Decide ONE thing to improve (too long? too formal? missing an example?).','Send the follow-up below, changed to fit what you want.','Compare the first and second answers.'],copy:'Now improve your answer: make it shorter and more casual, and add one concrete example.',ask:'What did you change in your follow-up, and did the answer get better?'}
+ ]},
+/* ---------- 3b: pro techniques ---------- */
+{icon:'🔭',name:'Pro Techniques',goal:'Detailed, step by step and self-checking prompts',
+ tip:'About 30 minutes with the labs. Key ideas: the AI cannot read minds (detail), asking for steps makes reasoning visible and checkable (chain of thought), big tasks work better as a chain of small prompts, examples and separators remove guessing, and asking the AI to check itself catches errors. Some newer models reason internally, but showing steps still lets her verify the logic.',
+ steps:[
+ {t:'info',title:'Technique 1: Be detailed 🔍',body:`<p><b>The AI cannot read your mind.</b> Everything you do not say, it has to guess.</p><div class="bad-prompt">❌ "Plan my study week."</div><div class="out">✅ I have exams in biology (Nov 12) and English (Nov 15). I can study 2 hours on weekdays and 4 on weekends. I focus best in the morning and get distracted easily, so use short 25 minute blocks. Give me a table, one row per day.</div><p>More detail means less guessing and a more useful answer.</p>`},
+ {t:'multi',key:'detailPicks',q:'"Plan my study week." Which details would make the AI\'s plan MUCH better?',opts:['Which subjects I have and the exam dates','How many hours per day I have','When I focus best (morning or night)','My favorite color','The format I want (table, calendar)','That I get distracted easily and need short blocks'],min:1,correct:[0,1,2,4,5],after:'Facts about your real situation are the secret.'},
+ {t:'info',title:'Technique 2: Step by step 🪜',body:`<p>Ask the AI to <b>think in steps before answering</b>. This is often called <b>chain of thought</b>. It works great for math, logic, planning and decisions.</p><ul><li>"Think step by step."</li><li>"Show your reasoning, then give the final answer."</li><li>"List your assumptions first."</li></ul><p class="muted">Some newer models already reason before they answer, but asking for steps still lets <b>you</b> check the logic.</p>`},
+ {t:'choice',q:'You need help with a tricky logic puzzle. Which prompt is best?',opts:['"Solve this puzzle. Just the answer."','"Solve this puzzle step by step, show your reasoning, then give the final answer and double check it."','"Puzzle help."','"Solve it FAST!!!"'],a:1,why:'Visible steps make mistakes easy to spot, for you and for the AI.'},
+ {t:'lab',key:'lab10',title:'Quick answer vs step by step',goal:'See how asking for steps changes the answer.',steps:['Open a chatbot and start a NEW chat. Send the prompt below (it asks for just the number).','In the SAME chat, send: "Now solve it step by step, show your reasoning, and check your answer."','Compare the two. Was the quick answer right? Could you tell how it got there?'],copy:'A bat and a ball cost 1.10 euros together. The bat costs 1 euro more than the ball. How much does the ball cost? Reply with just the number.',ask:'Did the two answers differ? Which one was easier to trust and check, and why?',tt:'The correct answer is 0.05 euros. Many people first say 0.10. If both AI answers are right, discuss why visible steps are still easier to verify.'},
+ {t:'info',title:'Technique 3: Break big tasks into a chain ⛓️',body:`<p>Instead of one giant request, send a <b>chain of small prompts</b>. Each answer feeds the next one.</p><div class="out">❌ "Make my whole presentation."\n\n✅ 1) Suggest 3 topics\n2) Make an outline\n3) Write slide 1\n4) Improve slide 1\n5) Repeat, then check consistency</div><p>You stay in control, and every step is easy to fix.</p>`},
+ {t:'order',q:'Chain it! Put these prompts in a smart order to build a talk.',items:['Ask for 3 possible topics and pick one','Ask for an outline of 5 slides','Ask for the text of slide 1 only','Ask to make slide 1 shorter and more visual','Repeat for the other slides, then ask for a final consistency check']},
+ {t:'lab',key:'lab11',title:'Build a prompt chain',goal:'Build something in small steps instead of one giant request.',steps:['Send the first prompt below to a chatbot and pick a topic.','Then send, one at a time: "Make a 5 slide outline." then "Write slide 1 only." then "What could be wrong or missing in this outline?"','Compare this experience with just asking "make me a whole presentation".'],copy:'Act as a presentation coach. Step 1 only: give me 3 possible topics for a 5 minute talk about AI for teenagers, and ask me which one I choose.',ask:'How did working in a chain feel compared to one giant request? Where did you step in to steer?'},
+ {t:'info',title:'Technique 4: Show examples and use separators 🏷️',body:`<p><b>Examples</b> show the exact style you want. <b>Separators</b> (like ###) mark your material, so the AI does not mix it up with your instructions.</p><div class="out">Label each comment as Positive or Negative.\nExample: "Loved it!" -> Positive\nExample: "Total waste of money" -> Negative\nNow label the comments between ###:\n###\nGreat teacher, very clear\nToo slow and boring\n###</div>`},
+ {t:'choice',q:'You want the AI to label comments in YOUR exact style. What works best?',opts:['"Label them nicely."','Give 2 labeled examples first, then put the new comments between ### markers','"Label them, and make the answer longer."','Write the request in capital letters'],a:1,why:'Examples remove guessing, and separators keep instructions and material apart.'},
+ {t:'info',title:'Technique 5: Make it check itself ✅',body:`<ul><li>"What could be wrong with this answer?"</li><li>"Check your answer against my requirements and fix anything missing."</li><li>"What are you unsure about?"</li><li>"Ask me questions first if anything is unclear."</li></ul><p class="muted">The AI can still be wrong while checking itself, so verify the important facts yourself.</p>`},
+ {t:'rewrite',key:'megaPrompt',q:'Boss level! Rewrite this weak prompt using at least 3 pro techniques.',bad:'Help me prepare for my exam.',ph:'Write your pro level prompt...',need:3,crit:PRO,example:'I have a biology exam in 10 days on cells and genetics. I can study 1.5 hours a day and I get distracted easily. Think step by step and make a day by day plan in a table with short 25 minute blocks. Before you start, ask me any questions you need. After the plan, tell me what could be missing.'},
+ {t:'toolkit',title:'Your Pro Prompt Toolkit 🧰',items:[['Be detailed','Here is my situation: [facts, dates, level, limits]. Ask me any questions you need before answering.'],['Step by step','Think step by step. Show your reasoning, then give the final answer.'],['Assumptions','List your assumptions first, then answer.'],['Prompt chain','Step 1 only: [task]. Wait for my feedback before step 2.'],['Examples','Here are 2 examples of what I want: [example 1] [example 2]. Now do the same for the text between ###.'],['Self-check','What could be wrong with this answer? Check it against my requirements and fix anything missing.'],['Options','Give me 3 options and compare them in a table.'],['Role and audience','Act as a [expert] explaining to [audience] in [format].']]},
+ {t:'open',key:'proTech',q:'Which pro technique will you use most, and for what real task this week?',ph:'I will use ... for ...',min:20,after:'Perfect. Use it today and see the difference.'}
  ]},
 /* ---------- 4 ---------- */
 {icon:'🌌',name:'Many Kinds of AI',goal:'Pick the right AI tool for the job',
@@ -374,7 +401,7 @@ const MISSIONS=[
 ];
 
 /* ================= step renderers ================= */
-const PASSIVE=new Set(['info','break']);
+const PASSIVE=new Set(['info','break','toolkit']);
 const T={};
 
 T.info=(st,el)=>{ el.innerHTML=`<h3>${st.title}</h3><div class="rich">${st.body}</div>`; };
@@ -483,19 +510,19 @@ T.redact=(st,el,api)=>{
 };
 
 T.rewrite=(st,el,api)=>{
-  let tries=0;
+  let tries=0; const C=st.crit||CRIT;
   el.innerHTML=`<h3>${st.q}</h3>${st.bad?`<div class="bad-prompt">❌ <i>"${esc(st.bad)}"</i></div>`:''}<textarea id="ta" placeholder="${esc(st.ph||'')}">${esc(S.ans[st.key]||'')}</textarea><div class="row"><button class="primary" id="ck">Check my prompt</button></div><ul class="crit" id="cr"></ul><div class="fb"></div>`;
-  const draw=(t)=>{ $('#cr',el).innerHTML=CRIT.map(c=>{const ok=t&&c.test(t);return `<li>${ok?'✅':'⬜'} ${c.label}${ok?'':`<span class="tip">${c.tip}</span>`}</li>`;}).join(''); };
+  const draw=(t)=>{ $('#cr',el).innerHTML=C.map(c=>{const ok=t&&c.test(t);return `<li>${ok?'✅':'⬜'} ${c.label}${ok?'':`<span class="tip">${c.tip}</span>`}</li>`;}).join(''); };
   draw('');
   $('#ck',el).onclick=()=>{
     const t=$('#ta',el).value.trim();
     if(t.length<10){ fb(el,false,'Write a prompt first.'); return; }
     tries++; S.ans[st.key]=t; save(); draw(t);
-    const met=CRIT.filter(c=>c.test(t)).length, need=st.need||3;
+    const met=C.filter(c=>c.test(t)).length, need=st.need||3;
     const ex=st.example?`<br><br><b>One possible version:</b><div class="out">${esc(st.example)}</div>`:'';
-    if(met>=need){ fb(el,true,`${met} of 5 ingredients. Strong prompt!${ex}<br><span class="muted">This checker only spots keywords. The real test is the answer you get. Try it in a chatbot!</span>`); burst($('#ck',el)); api.done(10+met*3); }
-    else if(tries>=3){ fb(el,true,`You have ${met} of 5. Good effort, take a look at an example and continue.${ex}`); api.done(5); }
-    else fb(el,false,`${met} of 5 ingredients. Add ${need-met} more ingredient${need-met>1?'s':''} (see the tips above) and check again.`);
+    if(met>=need){ fb(el,true,`${met} of ${C.length} ingredients. Strong prompt!${ex}<br><span class="muted">This checker only spots keywords. The real test is the answer you get. Try it in a chatbot!</span>`); burst($('#ck',el)); api.done(10+met*3); }
+    else if(tries>=3){ fb(el,true,`You have ${met} of ${C.length}. Good effort, take a look at an example and continue.${ex}`); api.done(5); }
+    else fb(el,false,`${met} of ${C.length} ingredients. Add${need-met} more ingredient${need-met>1?'s':''} (see the tips above) and check again.`);
   };
 };
 
@@ -590,6 +617,11 @@ T.break=(st,el,api)=>{
     if(t<=0){ clearInterval(iv); tm.textContent='🌟'; api.done(5); burst(tm); } },1000); };
 };
 
+T.toolkit=(st,el)=>{
+  el.innerHTML=`<h3>${st.title}</h3><p class="muted">Tap Copy to grab a phrase. Replace the [brackets] with your own details.</p>${st.items.map((it,i)=>`<div class="tile" style="margin:10px 0"><b>${esc(it[0])}</b><div class="out">${esc(it[1])}</div><button class="ghost small" data-i="${i}">Copy</button></div>`).join('')}`;
+  el.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>copyText(st.items[+b.dataset.i][1],b));
+};
+
 T.lab=(st,el,api)=>{
   const tools=['ChatGPT','Gemini','Claude','Google AI Studio','Other'];
   let tool='';
@@ -616,7 +648,7 @@ T.lab=(st,el,api)=>{
   };
 };
 
-const LABELS={lab1:'Lab: autocomplete test',lab2:'Lab: weak vs strong prompt',lab3:'Lab: follow-up refinement',lab4:'Lab: image prompt test',lab5:'Lab: same prompt, two tools',lab6:'Lab: with vs without system instructions',lab7:'Lab: privacy settings hunt',lab8:'Lab: hallucination hunt',lab9:'Lab: quiz me',whatAI:'What is AI? (first answer)',meetAI:'Where she meets AI',trustBefore:'Trust in chatbots at the start (0-10)',wantAI:'Wants AI for',thinkWord:'Does AI "think"?',rw1:'Rewritten space prompt',myPrompt:'Her own real prompt',imgPrompt:'Her image prompt',wantType:'AI type she wants to master',botPrompt:'Her AI helper instructions',botReflect:'Bot test reflection',buildIdea:'Wants to build',neverList:'Her Never Share list',factCheck:'Fact checking picks',doMyself:'What she will always do herself',powerPhrases:'Favorite power phrases',trustAfter:'Trust in chatbots at the end (0-10)',whatAI2:'What AI means now',rules:'Her AI rulebook',golden:'Golden rule'};
+const LABELS={detailPicks:'Details that improve a prompt',lab10:'Lab: quick answer vs step by step',lab11:'Lab: prompt chain',megaPrompt:'Her pro level prompt',proTech:'Pro technique she will use',lab1:'Lab: autocomplete test',lab2:'Lab: weak vs strong prompt',lab3:'Lab: follow-up refinement',lab4:'Lab: image prompt test',lab5:'Lab: same prompt, two tools',lab6:'Lab: with vs without system instructions',lab7:'Lab: privacy settings hunt',lab8:'Lab: hallucination hunt',lab9:'Lab: quiz me',whatAI:'What is AI? (first answer)',meetAI:'Where she meets AI',trustBefore:'Trust in chatbots at the start (0-10)',wantAI:'Wants AI for',thinkWord:'Does AI "think"?',rw1:'Rewritten space prompt',myPrompt:'Her own real prompt',imgPrompt:'Her image prompt',wantType:'AI type she wants to master',botPrompt:'Her AI helper instructions',botReflect:'Bot test reflection',buildIdea:'Wants to build',neverList:'Her Never Share list',factCheck:'Fact checking picks',doMyself:'What she will always do herself',powerPhrases:'Favorite power phrases',trustAfter:'Trust in chatbots at the end (0-10)',whatAI2:'What AI means now',rules:'Her AI rulebook',golden:'Golden rule'};
 
 T.cert=(st,el,api)=>{
   const a=S.ans, date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
@@ -624,7 +656,7 @@ T.cert=(st,el,api)=>{
   el.innerHTML=`<div class="cert" id="cert">
     <div style="font-size:3rem">🌌</div><h2>Certificate of Cosmic AI Literacy</h2><p class="muted">This certifies that</p>
     <div class="nm">${esc(S.name||'Space Explorer')}</div>
-    <p>completed all 8 missions of the Cosmic AI Academy</p>
+    <p>completed all ${MISSIONS.length} missions of the Cosmic AI Academy</p>
     <p class="big">Rank: <b style="color:var(--gold)">${rank()}</b> · ${S.xp} XP</p>
     ${a.golden?`<div class="quote">Golden rule: ${esc(a.golden)}</div>`:''}
     ${a.powerPhrases?`<p class="muted">Power phrases: ${esc(a.powerPhrases.join('  '))}</p>`:''}
