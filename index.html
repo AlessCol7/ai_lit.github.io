@@ -3,113 +3,152 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cosmic AI Academy</title>
+<title>Cosmic AI Academy - ADHD Friendly Edition</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 <style>
 :root{
-  --bg1:#060a1d; --bg2:#150e40; --card:rgba(22,27,66,.78); --line:rgba(160,150,255,.28);
-  --gold:#ffd86b; --violet:#9b7bff; --cyan:#6be4ff; --pink:#ff7bd5;
-  --text:#eef0ff; --muted:#a9b0d9; --good:#5df2a5; --bad:#ff7b8a;
+  --bg1:#070a1e; --bg2:#160f42; --card:rgba(23,28,70,0.85); --line:rgba(165,155,255,0.28);
+  --gold:#ffd86b; --violet:#9f7eff; --cyan:#6be4ff; --pink:#ff7bd5;
+  --text:#f2f4ff; --muted:#a9b2e0; --good:#5df2a5; --bad:#ff7b8a;
+  --streak:#ff9e42;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{margin:0}
+html,body{margin:0;padding:0}
 body{
   min-height:100vh; color:var(--text);
-  font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif; font-size:18px; line-height:1.5;
+  font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:18px; line-height:1.5;
   background:
-    radial-gradient(900px 500px at 12% -5%, rgba(155,123,255,.30), transparent 60%),
-    radial-gradient(800px 500px at 95% 10%, rgba(255,123,213,.18), transparent 60%),
-    radial-gradient(900px 700px at 50% 110%, rgba(107,228,255,.14), transparent 60%),
+    radial-gradient(900px 500px at 10% -5%, rgba(159,126,255,0.35), transparent 60%),
+    radial-gradient(850px 500px at 95% 10%, rgba(255,123,213,0.22), transparent 60%),
+    radial-gradient(900px 700px at 50% 115%, rgba(107,228,255,0.18), transparent 60%),
     linear-gradient(180deg,var(--bg1),var(--bg2));
   background-attachment:fixed;
 }
 #sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-.app{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:14px 16px 60px}
-.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;padding:10px 4px 14px}
-.brand{font-size:1.25rem;letter-spacing:.5px}
+.app{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:12px 16px 60px}
+
+/* Header & Top Bar */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;padding:8px 4px 14px}
+.brand{font-size:1.25rem;letter-spacing:.5px;font-weight:700}
 .brand b{background:linear-gradient(90deg,var(--gold),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
-.stats{display:flex;align-items:center;gap:10px;font-size:.95rem}
-.xpbar{width:130px;height:10px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
-.xpbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .5s}
+.stats{display:flex;align-items:center;gap:12px;font-size:.95rem;background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:99px;border:1px solid var(--line)}
+.xpbar{width:110px;height:10px;border-radius:99px;background:rgba(255,255,255,0.12);overflow:hidden}
+.xpbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .4s}
+.streak-badge{display:inline-flex;align-items:center;gap:4px;color:var(--streak);font-weight:bold;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .tools{display:flex;gap:8px;flex-wrap:wrap}
-button{font:inherit;color:inherit;cursor:pointer}
-.small{padding:6px 12px;font-size:.85rem}
-.ghost,.tools button{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:7px 12px;font-size:.85rem}
-.ghost:hover,.tools button:hover{background:rgba(255,255,255,.14)}
-.tools button.on{border-color:var(--gold);color:var(--gold)}
-.primary{background:linear-gradient(135deg,var(--violet),var(--pink));border:0;border-radius:14px;padding:11px 22px;font-weight:700;box-shadow:0 6px 22px rgba(155,123,255,.4);transition:transform .15s}
-.primary:hover:not(:disabled){transform:translateY(-2px)}
-.primary:disabled,.ghost:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
-.layout{display:grid;grid-template-columns:230px 1fr;gap:20px;align-items:start}
+
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ghost,.tools button{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:12px;padding:7px 12px;font-size:.85rem;transition:all .15s}
+.ghost:hover,.tools button:hover{background:rgba(255,255,255,.16);border-color:var(--cyan)}
+.tools button.on{border-color:var(--gold);color:var(--gold);background:rgba(255,216,107,0.14)}
+.jump-btn{background:linear-gradient(135deg,rgba(255,216,107,.2),rgba(255,123,213,.2));border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:7px 12px;font-size:.85rem;font-weight:700}
+.jump-btn:hover{background:linear-gradient(135deg,rgba(255,216,107,.35),rgba(255,123,213,.35))}
+
+/* Primary / Interactive Buttons */
+.primary{background:linear-gradient(135deg,var(--violet),var(--pink));border:0;border-radius:14px;padding:11px 22px;font-weight:700;box-shadow:0 6px 20px rgba(159,126,255,.35);transition:transform .15s,box-shadow .15s}
+.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(159,126,255,.5)}
+.primary:active{transform:translateY(1px)}
+.skip{background:transparent;border:1px dashed rgba(255,255,255,0.25);color:var(--muted);border-radius:14px;padding:10px 18px;font-size:0.9rem;transition:.15s}
+.skip:hover{border-color:var(--gold);color:var(--gold);background:rgba(255,216,107,0.06)}
+
+/* Main Layout */
+.layout{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start}
 .map{display:flex;flex-direction:column;gap:8px;position:sticky;top:12px}
-.planet{display:flex;align-items:center;gap:10px;text-align:left;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:.92rem}
-.planet .ic{font-size:1.5rem}
+.planet{display:flex;align-items:center;gap:10px;text-align:left;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:.9rem;transition:all .15s;width:100%}
+.planet .ic{font-size:1.4rem}
 .planet small{display:block;color:var(--muted);font-size:.75rem}
-.planet.cur{border-color:var(--gold);background:rgba(255,216,107,.1);box-shadow:0 0 18px rgba(255,216,107,.18)}
-.planet.fin{border-color:rgba(93,242,165,.5)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 26px 22px;backdrop-filter:blur(8px);box-shadow:0 12px 50px rgba(0,0,0,.35);animation:rise .4s ease both}
-@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.chip{display:inline-block;font-size:.8rem;color:var(--cyan);border:1px solid rgba(107,228,255,.4);border-radius:99px;padding:2px 12px;margin-bottom:8px}
-.goal{color:var(--muted);font-size:.85rem;margin:0 0 10px}
-h3{font-size:1.5rem;margin:6px 0 12px;line-height:1.25}
-.rich p{margin:0 0 10px}
-.rich ul{margin:6px 0 10px;padding-left:22px}
-.rich li{margin:4px 0}
+.planet.cur{border-color:var(--gold);background:rgba(255,216,107,.12);box-shadow:0 0 16px rgba(255,216,107,.2)}
+.planet.fin{border-color:rgba(93,242,165,.45)}
+.planet.special{border:1px dashed var(--gold);background:rgba(255,216,107,0.05)}
+
+/* Cards & Content */
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:26px 28px;backdrop-filter:blur(10px);box-shadow:0 14px 45px rgba(0,0,0,.4);animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card-header-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.chip{display:inline-block;font-size:.8rem;color:var(--cyan);border:1px solid rgba(107,228,255,.4);border-radius:99px;padding:3px 12px;font-weight:600}
+.chip.gold{color:var(--gold);border-color:rgba(255,216,107,.5);background:rgba(255,216,107,.08)}
+.chip.recap{color:#fff;border-color:var(--pink);background:linear-gradient(90deg,rgba(159,126,255,.3),rgba(255,123,213,.3))}
+.goal{color:var(--muted);font-size:.86rem;margin:0 0 14px}
+h3{font-size:1.55rem;margin:4px 0 14px;line-height:1.28;letter-spacing:-0.2px}
+.rich p{margin:0 0 12px}
+.rich ul{margin:6px 0 12px;padding-left:22px}
+.rich li{margin:5px 0}
 .muted{color:var(--muted);font-size:.9rem}
 .big{font-size:1.2rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:10px 0}
-.tile{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
-.tile .em{font-size:1.8rem;display:block}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pill-btn{background:rgba(255,255,255,0.08);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:0.85rem;color:var(--text);transition:all .15s}
+.pill-btn:hover{border-color:var(--gold);background:rgba(255,216,107,0.15);color:var(--gold)}
+
+/* Interactive Grid & Tiles */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.tile{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:16px;padding:14px;transition:transform .15s}
+.tile:hover{transform:translateY(-2px);border-color:var(--cyan)}
+.tile .em{font-size:1.8rem;display:block;margin-bottom:4px}
 .tile b{color:var(--gold)}
+
 .opts{display:grid;gap:10px;margin:12px 0}
-.opt,.chipb{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:left;transition:.15s}
-.opt:hover:not(:disabled),.chipb:hover{border-color:var(--cyan);background:rgba(107,228,255,.1)}
-.opt.right{border-color:var(--good);background:rgba(93,242,165,.15)}
-.opt.wrong{border-color:var(--bad);background:rgba(255,123,138,.12);opacity:.7}
+.opt,.chipb{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:left;transition:.15s;font-weight:500}
+.opt:hover,.chipb:hover{border-color:var(--cyan);background:rgba(107,228,255,.12);transform:translateX(3px)}
+.opt.right{border-color:var(--good)!important;background:rgba(93,242,165,.18)!important;color:#fff}
+.opt.wrong{border-color:var(--bad)!important;background:rgba(255,123,138,.15)!important;opacity:.75}
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
 .chipb{border-radius:99px;padding:9px 16px}
-.chipb.on{border-color:var(--gold);background:rgba(255,216,107,.16);color:var(--gold)}
-.chipb.ok{border-color:var(--good);background:rgba(93,242,165,.16)}
-.inp,textarea,select{width:100%;background:rgba(5,8,30,.6);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font:inherit}
-textarea{min-height:110px;resize:vertical}
+.chipb.on{border-color:var(--gold);background:rgba(255,216,107,.18);color:var(--gold);font-weight:700}
+.chipb.ok{border-color:var(--good);background:rgba(93,242,165,.18);color:#fff}
+
+.inp,textarea,select{width:100%;background:rgba(6,9,32,.7);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font:inherit}
+textarea{min-height:95px;resize:vertical}
 .inp:focus,textarea:focus,select:focus{outline:2px solid var(--violet);border-color:transparent}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
 .row .inp{flex:1;min-width:180px}
-label.f{display:block;margin:10px 0 4px;color:var(--gold);font-size:.9rem}
+label.f{display:block;margin:10px 0 4px;color:var(--gold);font-size:.9rem;font-weight:600}
 .fb{margin-top:10px;min-height:10px}
-.good,.bad{padding:10px 14px;border-radius:12px;font-size:.98rem;animation:rise .3s ease both}
-.good{background:rgba(93,242,165,.12);border:1px solid rgba(93,242,165,.4)}
-.bad{background:rgba(255,123,138,.1);border:1px solid rgba(255,123,138,.4)}
-.pg{color:var(--muted);font-size:.85rem}
-.sortcard{font-size:1.5rem;text-align:center;padding:30px 18px;margin:12px 0;border:2px dashed var(--violet);border-radius:20px;background:rgba(155,123,255,.1);animation:rise .3s ease both}
+.good,.bad,.info-fb{padding:11px 15px;border-radius:12px;font-size:.96rem;animation:rise .25s ease both}
+.good{background:rgba(93,242,165,.14);border:1px solid rgba(93,242,165,.45);color:#d9ffe9}
+.bad{background:rgba(255,123,138,.12);border:1px solid rgba(255,123,138,.45);color:#ffe0e4}
+.info-fb{background:rgba(107,228,255,.12);border:1px solid rgba(107,228,255,.4);color:#e2f9ff}
+
+.sortcard{font-size:1.45rem;text-align:center;padding:24px 18px;margin:12px 0;border:2px dashed var(--violet);border-radius:18px;background:rgba(159,126,255,.1);animation:rise .25s ease both;font-weight:600}
 .buckets{display:flex;gap:10px;flex-wrap:wrap}
-.bucket{flex:1;min-width:130px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:14px;padding:13px 10px;font-weight:700}
-.bucket:hover:not(:disabled){border-color:var(--gold);background:rgba(255,216,107,.12)}
+.bucket{flex:1;min-width:130px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:14px;padding:12px 10px;font-weight:700;transition:all .15s}
+.bucket:hover:not(:disabled){border-color:var(--gold);background:rgba(255,216,107,.15);transform:translateY(-2px)}
 .bucket.wrong{border-color:var(--bad);opacity:.5}
-.bucket:disabled{cursor:default}
+
 .redact{line-height:2.4;margin:12px 0}
-.tok{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:0 2px;font-size:1rem}
-.tok.hid{background:#000;color:#000;border-color:#555}
+.tok{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:8px;padding:4px 10px;margin:0 2px;font-size:1rem;transition:all .15s}
+.tok.hid{background:#000;color:#000;border-color:#555;box-shadow:inset 0 0 8px rgba(255,255,255,0.2)}
+
 .crit{list-style:none;padding:0;margin:10px 0}
 .crit li{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:.95rem}
 .crit .tip{display:block;color:var(--muted);font-size:.8rem;margin-left:28px}
 .quote{border-left:3px solid var(--gold);background:rgba(255,216,107,.08);padding:8px 14px;border-radius:0 10px 10px 0;margin:8px 0;font-style:italic}
 .bad-prompt{background:rgba(255,123,138,.1);border:1px dashed var(--bad);border-radius:12px;padding:10px 14px;margin:8px 0}
-.out{background:rgba(5,8,30,.7);border:1px solid var(--cyan);border-radius:14px;padding:12px 16px;margin:12px 0;white-space:pre-wrap;font-family:Consolas,monospace;font-size:.92rem}
+.out{background:rgba(6,9,32,.75);border:1px solid var(--cyan);border-radius:14px;padding:12px 16px;margin:12px 0;white-space:pre-wrap;font-family:Consolas,monospace;font-size:.92rem}
 .seq{display:flex;flex-direction:column;gap:6px;margin:10px 0}
-.seq div{background:rgba(155,123,255,.18);border:1px solid var(--violet);border-radius:12px;padding:8px 14px}
+.seq div{background:rgba(159,126,255,.18);border:1px solid var(--violet);border-radius:12px;padding:9px 14px}
 .seq div.okp{border-color:var(--good);background:rgba(93,242,165,.14)}
 .seq div.nop{border-color:var(--bad);background:rgba(255,123,138,.1)}
+
 .range{width:100%;accent-color:var(--gold)}
 .scalev{font-size:2.4rem;text-align:center;color:var(--gold);font-weight:700}
 .scalel{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem}
-.timer{font-size:4rem;text-align:center;color:var(--gold);font-weight:700;margin:8px 0}
-.chk{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin:8px 0;background:rgba(255,255,255,.05);cursor:pointer}
-.chk input{width:22px;height:22px;margin-top:3px;accent-color:var(--gold)}
-.nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.timer{font-size:3.5rem;text-align:center;color:var(--gold);font-weight:700;margin:8px 0}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin:8px 0;background:rgba(255,255,255,.05);cursor:pointer;transition:.15s}
+.chk:hover{background:rgba(255,255,255,.08)}
+.chk input{width:22px;height:22px;margin-top:2px;accent-color:var(--gold)}
+
+/* Navigation Controls - Completely Unblocked */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap}
+.nav-actions{display:flex;align-items:center;gap:10px}
 #dots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
-#dots i{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.18)}
-#dots i.d{background:var(--good)} #dots i.c{background:var(--gold);box-shadow:0 0 10px var(--gold);transform:scale(1.25)}
+#dots i{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:transform .15s}
+#dots i:hover{transform:scale(1.3)}
+#dots i.d{background:var(--good)} 
+#dots i.c{background:var(--gold);box-shadow:0 0 10px var(--gold);transform:scale(1.28)}
+
 .teacher{background:rgba(255,216,107,.1);border:1px dashed var(--gold);border-radius:16px;padding:12px 16px;margin-bottom:14px;font-size:.92rem}
 .cert{background:linear-gradient(160deg,#10163e,#2a1763);border:3px double var(--gold);border-radius:22px;padding:28px 24px;text-align:center}
 .labsteps{padding-left:24px;margin:10px 0}
@@ -119,26 +158,23 @@ h4{font-size:1.1rem;margin:16px 0 8px;color:var(--cyan)}
 .cert h2{font-size:1.9rem;margin:0 0 6px;color:var(--gold)}
 .cert .nm{font-size:2.2rem;margin:10px 0;background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
 .cert p{margin:6px 0}
-.review{margin-top:12px;font-size:.92rem}
-.review dt{color:var(--gold);margin-top:10px}
-.review dd{margin:2px 0 0;color:var(--text);white-space:pre-wrap}
 .danger{border-color:var(--bad)!important;color:var(--bad)}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
 .spark{position:absolute;font-size:18px;color:var(--gold);animation:fly .9s ease-out forwards}
 @keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
-.xpf{position:absolute;font-weight:700;color:var(--gold);font-size:1.2rem;text-shadow:0 0 10px #000;animation:upf 1.1s ease-out forwards}
+.xpf{position:absolute;font-weight:700;color:var(--gold);font-size:1.25rem;text-shadow:0 0 10px #000;animation:upf 1.1s ease-out forwards}
 @keyframes upf{to{transform:translateY(-60px);opacity:0}}
 .overlay{position:fixed;inset:0;z-index:60;background:rgba(3,5,20,.85);display:flex;align-items:center;justify-content:center;padding:20px}
-.overlay .box{background:var(--card);border:2px solid var(--gold);border-radius:24px;padding:30px;max-width:420px;text-align:center;animation:rise .4s ease both}
-.bigicon{font-size:4.5rem;animation:float 3s ease-in-out infinite}
-@keyframes float{50%{transform:translateY(-10px)}}
+.overlay .box{background:var(--card);border:2px solid var(--gold);border-radius:24px;padding:30px;max-width:460px;text-align:center;animation:rise .4s ease both}
+.bigicon{font-size:4.2rem;animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
 .shake{animation:shk .35s}
 @keyframes shk{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 body.calm *,body.calm *::before{animation:none!important;transition:none!important}
-@media (max-width:820px){
+@media (max-width:840px){
   .layout{grid-template-columns:1fr}
   .map{flex-direction:row;overflow-x:auto;position:static;padding-bottom:6px}
-  .planet{min-width:120px;flex-direction:column;text-align:center;gap:2px}
+  .planet{min-width:130px;flex-direction:column;text-align:center;gap:3px}
   .planet small{display:none}
   body{font-size:17px}
   .card{padding:20px 16px}
@@ -155,8 +191,17 @@ body.calm *,body.calm *::before{animation:none!important;transition:none!importa
 <div class="app">
   <header class="top">
     <div class="brand">🌌 <b>Cosmic AI Academy</b></div>
-    <div class="stats"><span id="lvl"></span><div class="xpbar"><i id="xpfill"></i></div><span id="xp"></span></div>
-    <div class="tools"><button id="calmBtn" title="Turns off animations">🌙 Calm mode</button><button id="teachBtn">👩‍🏫 Teacher view</button></div>
+    <div class="stats">
+      <span id="streak" class="streak-badge" title="Combo Streak">🔥 0 streak</span>
+      <span id="lvl">Lv 1</span>
+      <div class="xpbar"><i id="xpfill"></i></div>
+      <span id="xp">0 XP</span>
+    </div>
+    <div class="tools">
+      <button id="resumeBtn" class="jump-btn" title="Jump straight to Mission 5 or Recap">⚡ Jump to 2nd Half</button>
+      <button id="calmBtn" title="Turns off animations">🌙 Calm mode</button>
+      <button id="teachBtn">👩‍🏫 Teacher</button>
+    </div>
   </header>
   <div class="layout">
     <nav id="map" class="map" aria-label="Missions"></nav>
@@ -166,7 +211,10 @@ body.calm *,body.calm *::before{animation:none!important;transition:none!importa
       <div class="nav">
         <button id="back" class="ghost">← Back</button>
         <div id="dots"></div>
-        <button id="next" class="primary">Next →</button>
+        <div class="nav-actions">
+          <button id="skip" class="skip">Skip for now →</button>
+          <button id="next" class="primary">Next →</button>
+        </div>
       </div>
     </main>
   </div>
@@ -174,580 +222,966 @@ body.calm *,body.calm *::before{animation:none!important;transition:none!importa
 <div id="fx"></div>
 
 <script>
-/* ================= helpers & state ================= */
+/* ================= Sound FX (Tone.js, Synthesized) ================= */
+let soundEnabled = true;
+const soundFX = {
+  success: () => {
+    if(!soundEnabled) return;
+    try {
+      const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+      synth.volume.value = -12;
+      synth.triggerAttackRelease(["E5", "G#5", "B5"], "16n");
+    } catch(e){}
+  },
+  combo: () => {
+    if(!soundEnabled) return;
+    try {
+      const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+      synth.volume.value = -10;
+      synth.triggerAttackRelease(["C5", "E5", "G5", "C6"], "8n");
+    } catch(e){}
+  },
+  click: () => {
+    if(!soundEnabled) return;
+    try {
+      const membrane = new Tone.MembraneSynth().toDestination();
+      membrane.volume.value = -18;
+      membrane.triggerAttackRelease("C3", "32n");
+    } catch(e){}
+  }
+};
+
+/* ================= Helpers & Persistent State ================= */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
-const KEY = 'cosmicAI_lesson_v3';
-const fresh = () => ({name:'',xp:0,m:0,s:0,done:{},ans:{},calm:false,teacher:false});
-function load(){ try{ const r=localStorage.getItem(KEY); if(r) return Object.assign(fresh(), JSON.parse(r)); }catch(e){} return fresh(); }
+const KEY = 'cosmicAI_lesson_v4_adhd';
+const fresh = () => ({name:'',xp:180,m:4,s:0,done:{},ans:{},calm:false,teacher:false,streak:3});
+function load(){
+  try{ 
+    const r=localStorage.getItem(KEY); 
+    if(r) return Object.assign(fresh(), JSON.parse(r)); 
+  }catch(e){} 
+  return fresh(); 
+}
 let S = load();
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches && !S.calm){ S.calm = true; }
 
-const TITLES = ['Stargazer','Comet Rider','Star Pilot','Nebula Navigator','Galaxy Guide','Cosmic Captain','Supernova'];
+const TITLES = ['Stargazer','Comet Rider','Star Pilot','Nebula Navigator','Galaxy Guide','Cosmic Captain','Supernova Captain','Cosmic Overlord'];
 const level = () => Math.floor(S.xp/100);
 const rank = () => TITLES[Math.min(level(), TITLES.length-1)];
 
-/* ================= effects ================= */
+/* ================= Visual & Reward Effects ================= */
 function burst(elm){
   if(S.calm) return;
-  const fx=$('#fx'); const r=elm.getBoundingClientRect();
+  const fx=$('#fx'); 
+  const r=(elm && elm.getBoundingClientRect) ? elm.getBoundingClientRect() : {left:innerWidth/2, top:innerHeight/2, width:0, height:0};
   const cx=r.left+r.width/2, cy=r.top+r.height/2;
-  for(let i=0;i<14;i++){
-    const s=document.createElement('span'); s.className='spark'; s.textContent=['✦','✧','★','✨'][i%4];
+  for(let i=0;i<16;i++){
+    const s=document.createElement('span'); s.className='spark'; s.textContent=['✦','✧','★','✨','🚀'][i%5];
     s.style.left=cx+'px'; s.style.top=cy+'px';
-    s.style.setProperty('--dx',(Math.random()*240-120)+'px'); s.style.setProperty('--dy',(Math.random()*200-130)+'px');
-    s.style.color=['#ffd86b','#6be4ff','#ff7bd5','#9b7bff'][i%4];
+    s.style.setProperty('--dx',(Math.random()*260-130)+'px'); s.style.setProperty('--dy',(Math.random()*220-140)+'px');
+    s.style.color=['#ffd86b','#6be4ff','#ff7bd5','#9f7eff','#5df2a5'][i%5];
     fx.appendChild(s); setTimeout(()=>s.remove(),950);
   }
 }
+
 function floatXP(txt){
   if(S.calm) return;
   const t=$('#xp').getBoundingClientRect(); const s=document.createElement('div');
   s.className='xpf'; s.textContent=txt; s.style.left=(t.left)+'px'; s.style.top=(t.bottom+4)+'px';
   $('#fx').appendChild(s); setTimeout(()=>s.remove(),1150);
 }
+
 function overlay(html, btnText, cb){
   const o=document.createElement('div'); o.className='overlay';
-  o.innerHTML=`<div class="box">${html}<p><button class="primary" id="ovb">${btnText}</button></p></div>`;
+  o.innerHTML=`<div class="box">${html}<p style="margin-top:20px"><button class="primary" id="ovb">${btnText}</button></p></div>`;
   document.body.appendChild(o);
-  $('#ovb',o).onclick=()=>{ o.remove(); cb&&cb(); };
+  $('#ovb',o).onclick=()=>{ 
+    Tone.start(); soundFX.click();
+    o.remove(); cb&&cb(); 
+  };
   burst($('.bigicon',o)||o);
 }
-async function copyText(text, btn){
+
+function copyText(text, btn){
   const label=btn.dataset.l||btn.textContent; btn.dataset.l=label;
-  try{ await navigator.clipboard.writeText(text); btn.textContent='Copied ✓'; }
-  catch(e){
-    const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select();
-    try{ document.execCommand('copy'); btn.textContent='Copied ✓'; }catch(_){ btn.textContent='Select the text and copy it'; }
-    ta.remove();
-  }
+  const ta=document.createElement('textarea'); ta.value=text; 
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); btn.textContent='Copied ✓'; soundFX.success(); }
+  catch(e) { btn.textContent='Select to copy'; }
+  ta.remove();
   setTimeout(()=>{btn.textContent=label;},1600);
 }
-function fb(root, ok, msg){
+
+function fb(root, ok, msg, isInfo=false){
   const f=root.querySelector('.fb'); if(!f) return;
-  f.innerHTML=`<div class="${ok?'good':'bad'}">${ok?'✨ ':'🌑 '}${msg}</div>`;
+  if(isInfo){
+    f.innerHTML=`<div class="info-fb">💡 ${msg}</div>`;
+  } else {
+    f.innerHTML=`<div class="${ok?'good':'bad'}">${ok?'✨ ':'🌑 '}${msg}</div>`;
+  }
 }
 
-/* ================= lesson content ================= */
+/* ================= Criteria & Rubrics ================= */
 const CRIT=[
  {id:'role',label:'Role: who should the AI be?',tip:'Try: "Act as a friendly teacher..."',test:t=>/\b(act as|you are|pretend|imagine you|as a|be my|role of)\b/i.test(t)},
- {id:'task',label:'Clear task: what exactly should it make?',tip:'Say what to create and about what, in a full sentence.',test:t=>t.trim().split(/\s+/).length>=9},
- {id:'ctx',label:'Context: who is it for and why?',tip:'Add who it is for, your level, or why you need it.',test:t=>/\b(for (a|an|my|me|the)|my|i am|i'm|because|audience|beginner|student|class|grade|years? old|so that|i need|i want|i have)\b/i.test(t)},
- {id:'fmt',label:'Format: how should the answer look?',tip:'Ask for bullets, a table, 100 words, 3 steps...',test:t=>/\b(bullets?|list|table|steps?|words|sentences?|paragraphs?|short|max|maximum|format|outline|summary|headings?|points|minutes|examples?)\b/i.test(t)},
- {id:'lim',label:'Limits or tone: style, what to avoid',tip:'Add a tone (funny, simple) or a limit (no jargon).',test:t=>/\b(don't|do not|avoid|only|no more than|at most|limit|tone|friendly|funny|simple|formal|casual|without|must|keep it|fun|serious|jargon)\b/i.test(t)}
+ {id:'task',label:'Clear task: what exactly to create?',tip:'Say what to create in a full thought.',test:t=>t.trim().split(/\s+/).length>=5},
+ {id:'ctx',label:'Context: who is it for and why?',tip:'Add who it is for or your level.',test:t=>/\b(for (a|an|my|me|the)|my|i am|i'm|because|audience|beginner|student|class|grade|years? old|so that|i need|i want)\b/i.test(t)},
+ {id:'fmt',label:'Format: how the answer looks',tip:'Ask for bullets, a table, 3 steps...',test:t=>/\b(bullets?|list|table|steps?|words|sentences?|paragraphs?|short|max|outline|summary)\b/i.test(t)},
+ {id:'lim',label:'Limits or style: what to avoid',tip:'Add a tone (funny, simple) or limit (no jargon).',test:t=>/\b(don't|do not|avoid|only|no more than|limit|tone|friendly|funny|simple|casual|fun|short)\b/i.test(t)}
 ];
 
 const PRO=[
- {label:'Step by step: asks for reasoning or stages',tip:'Add "think step by step" or "first... then...".',test:t=>/\b(step by step|step-by-step|steps|first|then|reasoning|think through|stages)\b/i.test(t)},
- {label:'Detail: real facts about your situation',tip:'Add dates, the time you have, your level, what you struggle with.',test:t=>t.trim().split(/\s+/).length>=25},
- {label:'Format: how the answer should look',tip:'Ask for a table, bullets, short blocks...',test:t=>/\b(table|bullets?|list|format|words|sentences?|outline|day by day|blocks|checklist)\b/i.test(t)},
- {label:'Self-check or questions first',tip:'Add "ask me questions first" or "what could be wrong?".',test:t=>/\b(check|verify|double-check|unsure|ask me|questions|what could be|assumptions|review)\b/i.test(t)},
- {label:'Example or separators',tip:'Add an example, or put material between ### markers.',test:t=>/(###|"""|\bexample|for instance|like this|e\.g\.)/i.test(t)}
+ {label:'Step by step: asks for reasoning',tip:'Add "think step by step" or "first... then...".',test:t=>/\b(step by step|step-by-step|steps|first|then|reasoning|think through)\b/i.test(t)},
+ {label:'Real details: dates, time, level',tip:'Add exam dates, hours, or focus struggles.',test:t=>t.trim().split(/\s+/).length>=12},
+ {label:'Format: structure of output',tip:'Ask for table, checklist, or short blocks.',test:t=>/\b(table|bullets?|list|format|checklist|outline|blocks)\b/i.test(t)},
+ {label:'Self-check or questions',tip:'Add "ask me questions first" or "check for errors".',test:t=>/\b(check|verify|questions|ask me|assumptions)\b/i.test(t)}
 ];
 
+/* ================= LESSON CONTENT ================= */
 const MISSIONS=[
-/* ---------- 1 ---------- */
-{icon:'🚀',name:'Launch Pad',goal:'Tell me what AI means to YOU',
- tip:'About 8 minutes. ADHD friendly setup: one task per screen, breaks in missions 5 and 8, Calm mode button for sensory comfort. Let her stand, fidget or doodle. Do not correct her first answers here: they are the "before" picture that she compares at the end.',
+/* ---------- 1: Launch Pad ---------- */
+{icon:'🚀',name:'Launch Pad',goal:'Personalize your mission and test AI familiarity',
+ tip:'ADHD tip: First steps are rapid setup. Let the student fidget or speak answers aloud.',
  steps:[
- {t:'name',title:'Welcome, space explorer! 🌠',body:`<p>Today is a mission with <b>9 short stops</b>. Tiny bits of reading, lots of buttons, lots of your opinions. You earn ✨ XP for every answer.</p><p>There are no wrong opinions here, only honest ones. First: what should I call you?</p>`},
- {t:'open',key:'whatAI',q:'In your own words: what is AI? Explain it to a friend who has never heard of it.',ph:'AI is...',min:15,after:'Locked in. We will check this again at the very end, to see if your answer changes.',tt:'Ask her to read it aloud. Ask: where did you learn this idea of AI (movies, friends, social media)?'},
- {t:'multi',key:'meetAI',q:'Where did you already meet AI this week? Tap all that apply.',opts:['Spotify or YouTube recommendations','TikTok or Instagram feed','Phone face unlock','Google Translate','Chatbots (Gemini, ChatGPT...)','Autocorrect and keyboard suggestions','Photo filters','Voice assistants','Video game characters','I am not sure'],min:1,after:'You are already surrounded by AI! Today you learn to steer it instead of just riding along.'},
- {t:'scale',key:'trustBefore',q:'How much do you trust what a chatbot tells you?',lo:'Not at all',hi:'Completely',after:v=>`Saved: <b>${v}/10</b>. We will measure again at the end.`},
- {t:'poll',key:'wantAI',q:'What do you mostly want AI to help you with?',opts:['Study and homework','Creative projects','Coding','Work and career','Just curious','Fun and games'],reflect:'Great. Keep that in mind, we will use it in the exercises.'}
- ]},
-/* ---------- 2 ---------- */
-{icon:'🪐',name:'What is AI?',goal:'Understand what AI really is (and is not)',
- tip:'About 12 minutes. Let her argue the borderline cards (spam filter, calculator). The key mental model: a chatbot is autocomplete on rocket fuel. It predicts likely words, it does not automatically check facts.',
+  {t:'name',title:'Welcome back, Space Pioneer! 🌠',body:`<p>Ready to master AI tools like a pro? You earn ✨ <b>XP</b> and build a <b>Combo Streak</b> for every move.</p><p><b>Remember:</b> Nothing is locked. If you ever want to move on, hit <i>Skip for now</i> or <i>Next</i> anytime!</p>`},
+  {t:'open',key:'whatAI',q:'In one quick sentence: what does "AI" mean to you right now?',ph:'AI is like...',chips:['AI is autocomplete on rocket fuel','AI is a pattern-prediction machine','AI is a smart research assistant'],after:'Locked in! We\'ll compare this at the end.'},
+  {t:'multi',key:'meetAI',q:'Where did you already encounter AI this week?',opts:['Spotify / YouTube recs','TikTok / Instagram feed','Phone face unlock','Google Translate','ChatGPT / Gemini','Autocorrect & predictive typing','Video game NPC logic'],min:1,after:'You are already surrounded by AI models daily.'},
+  {t:'scale',key:'trustBefore',q:'On a scale of 0 to 10, how much do you trust chatbot answers right now?',lo:'Zero trust',hi:'100% trust',after:v=>`Saved: <b>${v}/10</b>.`}
+ ]
+},
+
+/* ---------- 2: What is AI? ---------- */
+{icon:'🪐',name:'What is AI?',goal:'The big secret: autocomplete on rocket fuel',
+ tip:'Key takeaway: LLMs predict likely words based on patterns. Confident does NOT mean true.',
  steps:[
- {t:'sort',q:'AI or NOT AI? Decide fast!',buckets:[{id:'ai',label:'AI',icon:'🤖'},{id:'no',label:'Not AI',icon:'⚙️'}],items:[
-  {x:'Netflix suggesting a show you might like',b:'ai',why:'It learns patterns from what millions of people watch.'},
-  {x:'A calculator adding 2 + 2',b:'no',why:'Fixed rules, always the same. Nothing is learned.'},
-  {x:'Face unlock on a phone',b:'ai',why:'It recognises patterns in faces.'},
-  {x:'A light switch',b:'no',why:'Just a circuit. Zero learning.'},
-  {x:'Google Translate',b:'ai',why:'It learned language patterns from huge amounts of text.'},
-  {x:'An alarm ringing at 7:00',b:'no',why:'One simple rule you set yourself.'},
-  {x:'A chatbot writing a poem',b:'ai',why:'It generates new text from learned patterns.'},
-  {x:'An email spam filter',b:'ai',why:'It learns what spam looks like and keeps improving.'}
- ]},
- {t:'info',title:'How chatbots actually work 🧠',body:`<p>A chatbot (an <b>LLM</b>, Large Language Model) read a gigantic amount of text and learned patterns.</p><p>When you write to it, it <b>predicts the next word</b>, then the next, then the next.</p><p>Think of it as <b>autocomplete on rocket fuel</b> 🚀. It does not look facts up in a perfect brain. It builds a <i>likely-sounding</i> answer.</p>`},
- {t:'choice',q:'Finish the sentence the way an LLM would: "Once upon a ..."',opts:['time','sandwich','laptop','Tuesday'],a:0,why:'You predicted by pattern. That is exactly the trick, just at a gigantic scale.'},
- {t:'choice',q:'Why can a chatbot say something false while sounding 100% sure?',opts:['It is lying on purpose','It predicts likely-sounding words and does not automatically check facts','The internet is always wrong','It gets tired'],a:1,why:'This is called a <b>hallucination</b>. A confident tone does not mean true.'},
- {t:'choice',q:'Does AI understand things the way you do?',opts:['Yes, exactly like a human brain','It is great at language patterns, but has no life experience, feelings or built-in fact checking','No, it answers completely at random','Only if you say please'],a:1,why:'Being polite is nice, but it is pattern power, not human understanding.'},
- {t:'lab',key:'lab1',title:'Autocomplete test',goal:'See with your own eyes that a chatbot predicts words, it does not look answers up.',steps:['Open ChatGPT, Gemini, Claude or Google AI Studio.','Send the prompt below.','Press the regenerate or "try again" button 2 times (in AI Studio, run it again). Compare the 3 answers.'],copy:'Finish this sentence in a creative way: "The most surprising thing about space is..."',ask:'Were the 3 answers the same? What does that tell you about how the AI works?',tt:'Link it back to autocomplete: same start, different likely continuations.'},
- {t:'open',key:'thinkWord',q:'Your opinion: is it OK to say that AI "thinks"? If not, what word would you use instead?',ph:'I would say it...',min:10,after:'Interesting choice of word. Words shape how much we trust a tool.',tt:'Good discussion point: "thinks", "predicts", "calculates", "guesses". How does the word change trust?'}
- ]},
-/* ---------- 3 ---------- */
-{icon:'⭐',name:'Prompt Power',goal:'Write prompts that get great answers',
- tip:'About 15 minutes. Have her run her best prompt in a real chatbot, then improve it once together. The checker only looks for keywords as a rough guide. You judge quality. Praise iteration, not perfection.',
+  {t:'sort',q:'AI or NOT AI? Quick Sort!',buckets:[{id:'ai',label:'AI Pattern',icon:'🤖'},{id:'no',label:'Fixed Code',icon:'⚙️'}],items:[
+    {x:'Netflix recommending a movie you love',b:'ai',why:'Learns viewing patterns across millions.'},
+    {x:'A pocket calculator doing 12 × 12',b:'no',why:'Fixed math circuit. Zero machine learning.'},
+    {x:'Face unlock on a smartphone',b:'ai',why:'Computer vision pattern recognition.'},
+    {x:'An alarm clock ringing at 7:00 AM',b:'no',why:'Simple fixed trigger.'},
+    {x:'Autocomplete predicting your next sentence',b:'ai',why:'Language pattern prediction.'}
+  ]},
+  {t:'choice',q:'Finish this sentence like an AI model: "Once upon a ..."',opts:['time','sandwich','spaceship','Tuesday'],a:0,why:'You picked the most statistically likely word! That is identical to how an LLM writes.'},
+  {t:'choice',q:'Why can a chatbot sound 100% confident even when it is totally wrong?',opts:['It lies to play tricks','It calculates likely-sounding words, but does NOT automatically fact-check itself','It gets tired after too many questions'],a:1,why:'That is a <b>hallucination</b>. Fluency is NOT the same as truth!'}
+ ]
+},
+
+/* ---------- 3: Prompt Power ---------- */
+{icon:'⭐',name:'Prompt Power',goal:'The 4-part formula for high-impact prompts',
+ tip:'Recipe: Role + Task + Context + Format (RTCF).',
  steps:[
- {t:'info',title:'The 4 ingredients of a great prompt',body:`<div class="grid"><div class="tile"><span class="em">🎭</span><b>R: Role</b><br>Who should the AI be?</div><div class="tile"><span class="em">🎯</span><b>T: Task</b><br>What exactly should it do?</div><div class="tile"><span class="em">🧩</span><b>C: Context</b><br>Who is it for? Why?</div><div class="tile"><span class="em">📐</span><b>F: Format</b><br>How should it look?</div></div><p>Bonus: add <b>limits and tone</b> (funny, simple, no jargon).</p>`},
- {t:'choice',q:'Which prompt gets the best answer?',opts:['"Help me with history."','"Act as a friendly history tutor. Explain the causes of World War 1 to a 15 year old in 5 bullet points, with one fun fact."','"Tell me everything about wars."'],a:1,why:'It has a role, task, context (15 year old) and format (5 bullets).'},
- {t:'rewrite',key:'rw1',q:'Level up this weak prompt. Rewrite it using the ingredients!',bad:'Write something about space.',ph:'Rewrite the prompt here...',need:3,example:'Act as a fun science teacher. Write a 100 word story about a robot visiting Mars, for a 10 year old. Keep it funny and end with a question.'},
- {t:'lab',key:'lab2',title:'Weak vs strong prompt',goal:'Feel the difference a good prompt makes.',steps:['Open a chatbot and start a NEW chat. Send the weak prompt: "Write something about space."','Start another NEW chat and send your improved prompt (copy it below).','Put the two answers side by side and compare them.'],copy:()=>S.ans.rw1,fallback:'Act as a fun science teacher. Write a 100 word story about a robot visiting Mars, for a 10 year old. Keep it funny and end with a question.',ask:'Which answer was more useful, and which ingredient (role, task, context, format, limits) made the biggest difference?'},
- {t:'choice',q:'The answer is too long and too formal. What is the smartest next move?',opts:['Close the chat, AI is useless','Reply: "Shorter please, max 5 sentences, casual tone, like talking to a friend."','Send the exact same prompt again and hope','Type in angry capital letters'],a:1,why:'Prompting is a conversation. Refine it like an editor, one clear change at a time.'},
- {t:'choice',q:'You want AI to write a message in your own voice. What helps most?',opts:['"Write it nicely"','Paste two messages you wrote and say "match this style"','Nothing, it already knows me','Write in ALL CAPS'],a:1,why:'<b>Show, do not just tell.</b> Examples are one of the strongest tricks you have.'},
- {t:'rewrite',key:'myPrompt',q:'Your turn! Write a prompt you would REALLY use this week. Use at least 3 ingredients.',bad:null,ph:'Write your own real prompt...',need:3,example:null,tt:'Open a chatbot and run her prompt live. Then ask for ONE improvement together.'},
- {t:'lab',key:'lab3',title:'Refine like an editor',goal:'Prompting is a conversation. Practice improving an answer with a follow-up.',steps:['Send YOUR OWN prompt from the last step to a chatbot.','Read the answer. Decide ONE thing to improve (too long? too formal? missing an example?).','Send the follow-up below, changed to fit what you want.','Compare the first and second answers.'],copy:'Now improve your answer: make it shorter and more casual, and add one concrete example.',ask:'What did you change in your follow-up, and did the answer get better?'}
- ]},
-/* ---------- 3b: pro techniques ---------- */
-{icon:'🔭',name:'Pro Techniques',goal:'Detailed, step by step and self-checking prompts',
- tip:'About 30 minutes with the labs. Key ideas: the AI cannot read minds (detail), asking for steps makes reasoning visible and checkable (chain of thought), big tasks work better as a chain of small prompts, examples and separators remove guessing, and asking the AI to check itself catches errors. Some newer models reason internally, but showing steps still lets her verify the logic.',
+  {t:'info',title:'The RTCF Formula 🎯',body:`<div class="grid"><div class="tile"><span class="em">🎭</span><b>R: Role</b><br>Who should the AI act as?</div><div class="tile"><span class="em">🎯</span><b>T: Task</b><br>What exact output do you need?</div><div class="tile"><span class="em">🧩</span><b>C: Context</b><br>Who is it for? Any constraints?</div><div class="tile"><span class="em">📐</span><b>F: Format</b><br>Bullets, table, or 3 short paragraphs?</div></div>`},
+  {t:'choice',q:'Which prompt gets a 10x better answer?',opts:['"Help me write about Mars."','"Act as a witty astrophysicist. Explain how water might exist on Mars to a 14-year-old in 4 punchy bullet points."','"Mars info please."'],a:1,why:'Role (astrophysicist), Task (explain water on Mars), Context (14-year-old), Format (4 punchy bullets)!'},
+  {t:'rewrite',key:'rw1',q:'Level up this lazy prompt into a powerhouse prompt:',bad:'Write about black holes.',ph:'Act as...',templates:['Act as a NASA astronomer. Explain how black holes form to a high school student in 3 bullet points.','Act as a sci-fi author. Describe falling into a black hole in 5 exciting sentences without technical jargon.']}
+ ]
+},
+
+/* ---------- 4: Pro Techniques ---------- */
+{icon:'🔭',name:'Pro Techniques',goal:'Chain of thought, prompt chaining, and self-checks',
+ tip:'ADHD-friendly summary: Never feed a giant messy project at once. Break it into a chain.',
  steps:[
- {t:'info',title:'Technique 1: Be detailed 🔍',body:`<p><b>The AI cannot read your mind.</b> Everything you do not say, it has to guess.</p><div class="bad-prompt">❌ "Plan my study week."</div><div class="out">✅ I have exams in biology (Nov 12) and English (Nov 15). I can study 2 hours on weekdays and 4 on weekends. I focus best in the morning and get distracted easily, so use short 25 minute blocks. Give me a table, one row per day.</div><p>More detail means less guessing and a more useful answer.</p>`},
- {t:'multi',key:'detailPicks',q:'"Plan my study week." Which details would make the AI\'s plan MUCH better?',opts:['Which subjects I have and the exam dates','How many hours per day I have','When I focus best (morning or night)','My favorite color','The format I want (table, calendar)','That I get distracted easily and need short blocks'],min:1,correct:[0,1,2,4,5],after:'Facts about your real situation are the secret.'},
- {t:'info',title:'Technique 2: Step by step 🪜',body:`<p>Ask the AI to <b>think in steps before answering</b>. This is often called <b>chain of thought</b>. It works great for math, logic, planning and decisions.</p><ul><li>"Think step by step."</li><li>"Show your reasoning, then give the final answer."</li><li>"List your assumptions first."</li></ul><p class="muted">Some newer models already reason before they answer, but asking for steps still lets <b>you</b> check the logic.</p>`},
- {t:'choice',q:'You need help with a tricky logic puzzle. Which prompt is best?',opts:['"Solve this puzzle. Just the answer."','"Solve this puzzle step by step, show your reasoning, then give the final answer and double check it."','"Puzzle help."','"Solve it FAST!!!"'],a:1,why:'Visible steps make mistakes easy to spot, for you and for the AI.'},
- {t:'lab',key:'lab10',title:'Quick answer vs step by step',goal:'See how asking for steps changes the answer.',steps:['Open a chatbot and start a NEW chat. Send the prompt below (it asks for just the number).','In the SAME chat, send: "Now solve it step by step, show your reasoning, and check your answer."','Compare the two. Was the quick answer right? Could you tell how it got there?'],copy:'A bat and a ball cost 1.10 euros together. The bat costs 1 euro more than the ball. How much does the ball cost? Reply with just the number.',ask:'Did the two answers differ? Which one was easier to trust and check, and why?',tt:'The correct answer is 0.05 euros. Many people first say 0.10. If both AI answers are right, discuss why visible steps are still easier to verify.'},
- {t:'info',title:'Technique 3: Break big tasks into a chain ⛓️',body:`<p>Instead of one giant request, send a <b>chain of small prompts</b>. Each answer feeds the next one.</p><div class="out">❌ "Make my whole presentation."\n\n✅ 1) Suggest 3 topics\n2) Make an outline\n3) Write slide 1\n4) Improve slide 1\n5) Repeat, then check consistency</div><p>You stay in control, and every step is easy to fix.</p>`},
- {t:'order',q:'Chain it! Put these prompts in a smart order to build a talk.',items:['Ask for 3 possible topics and pick one','Ask for an outline of 5 slides','Ask for the text of slide 1 only','Ask to make slide 1 shorter and more visual','Repeat for the other slides, then ask for a final consistency check']},
- {t:'lab',key:'lab11',title:'Build a prompt chain',goal:'Build something in small steps instead of one giant request.',steps:['Send the first prompt below to a chatbot and pick a topic.','Then send, one at a time: "Make a 5 slide outline." then "Write slide 1 only." then "What could be wrong or missing in this outline?"','Compare this experience with just asking "make me a whole presentation".'],copy:'Act as a presentation coach. Step 1 only: give me 3 possible topics for a 5 minute talk about AI for teenagers, and ask me which one I choose.',ask:'How did working in a chain feel compared to one giant request? Where did you step in to steer?'},
- {t:'info',title:'Technique 4: Show examples and use separators 🏷️',body:`<p><b>Examples</b> show the exact style you want. <b>Separators</b> (like ###) mark your material, so the AI does not mix it up with your instructions.</p><div class="out">Label each comment as Positive or Negative.\nExample: "Loved it!" -> Positive\nExample: "Total waste of money" -> Negative\nNow label the comments between ###:\n###\nGreat teacher, very clear\nToo slow and boring\n###</div>`},
- {t:'choice',q:'You want the AI to label comments in YOUR exact style. What works best?',opts:['"Label them nicely."','Give 2 labeled examples first, then put the new comments between ### markers','"Label them, and make the answer longer."','Write the request in capital letters'],a:1,why:'Examples remove guessing, and separators keep instructions and material apart.'},
- {t:'info',title:'Technique 5: Make it check itself ✅',body:`<ul><li>"What could be wrong with this answer?"</li><li>"Check your answer against my requirements and fix anything missing."</li><li>"What are you unsure about?"</li><li>"Ask me questions first if anything is unclear."</li></ul><p class="muted">The AI can still be wrong while checking itself, so verify the important facts yourself.</p>`},
- {t:'rewrite',key:'megaPrompt',q:'Boss level! Rewrite this weak prompt using at least 3 pro techniques.',bad:'Help me prepare for my exam.',ph:'Write your pro level prompt...',need:3,crit:PRO,example:'I have a biology exam in 10 days on cells and genetics. I can study 1.5 hours a day and I get distracted easily. Think step by step and make a day by day plan in a table with short 25 minute blocks. Before you start, ask me any questions you need. After the plan, tell me what could be missing.'},
- {t:'toolkit',title:'Your Pro Prompt Toolkit 🧰',items:[['Be detailed','Here is my situation: [facts, dates, level, limits]. Ask me any questions you need before answering.'],['Step by step','Think step by step. Show your reasoning, then give the final answer.'],['Assumptions','List your assumptions first, then answer.'],['Prompt chain','Step 1 only: [task]. Wait for my feedback before step 2.'],['Examples','Here are 2 examples of what I want: [example 1] [example 2]. Now do the same for the text between ###.'],['Self-check','What could be wrong with this answer? Check it against my requirements and fix anything missing.'],['Options','Give me 3 options and compare them in a table.'],['Role and audience','Act as a [expert] explaining to [audience] in [format].']]},
- {t:'open',key:'proTech',q:'Which pro technique will you use most, and for what real task this week?',ph:'I will use ... for ...',min:20,after:'Perfect. Use it today and see the difference.'}
- ]},
-/* ---------- 4 ---------- */
-{icon:'🌌',name:'Many Kinds of AI',goal:'Pick the right AI tool for the job',
- tip:'About 15 minutes. Keep a real image generator open in another tab. Change ONE variable at a time (style, then light, then mood) and compare results side by side.',
+  {t:'choice',q:'You have a complicated math or logic puzzle. What magic phrase prevents errors?',opts:['"Think step by step and explain your reasoning first."','"Give me the number right now."','"Be quick!"'],a:0,why:'<b>Chain of Thought</b> forces the model to generate the intermediate tokens first!'},
+  {t:'order',q:'Prompt Chaining! Order these steps to build a school presentation:',items:['Step 1: Brainstorm 3 interesting topics & choose one','Step 2: Create a 4-slide outline','Step 3: Draft slide 1 with punchy bullets','Step 4: Ask the AI "What could be missing or biased?"']},
+  {t:'choice',q:'How do you guarantee an AI writes in your exact personal voice?',opts:['Give it 2 sample paragraphs you wrote and say "Match this exact tone"','Type in all capital letters','Tell it to sound "super smart"'],a:0,why:'Examples (few-shot prompting) beat vague adjectives every single time!'}
+ ]
+},
+
+/* ---------- MIDPOINT SPECIAL: RECAP & FAST-FIRE CHECKPOINT ---------- */
+{icon:'⚡',name:'Mid-Lesson Recap',goal:'Fast-fire checkpoint & review of the first half!',isRecap:true,
+ tip:'You covered the first 4 missions! This interactive checkpoint cements the core wins in under 3 minutes.',
  steps:[
- {t:'info',title:'Different AI, different superpowers',body:`<div class="grid"><div class="tile"><span class="em">💬</span><b>Text</b><br>chat, write, explain, translate, summarize</div><div class="tile"><span class="em">🎨</span><b>Image</b><br>create pictures from words</div><div class="tile"><span class="em">🎧</span><b>Audio</b><br>speech to text, voices, music</div><div class="tile"><span class="em">💻</span><b>Code</b><br>write and fix programs</div><div class="tile"><span class="em">🎬</span><b>Video</b><br>short clips from text</div></div><p>Many tools mix several. Your job: pick the right one for the task.</p>`},
- {t:'sort',q:'Which type of AI fits the task?',buckets:[{id:'text',label:'Text',icon:'💬'},{id:'img',label:'Image',icon:'🎨'},{id:'aud',label:'Audio',icon:'🎧'},{id:'code',label:'Code',icon:'💻'},{id:'vid',label:'Video',icon:'🎬'}],items:[
-  {x:'Write a funny birthday message',b:'text',why:'Text AI is great at wording.'},
-  {x:'Paint a dragon over a neon city',b:'img',why:'Describing a picture: image AI.'},
-  {x:'Turn a voice note into written text',b:'aud',why:'Speech to text is audio AI.'},
-  {x:'Find the bug in my Python program',b:'code',why:'Code AI reads and fixes code.'},
-  {x:'Make a 5 second clip of a cat on the moon',b:'vid',why:'Moving pictures from text: video AI.'},
-  {x:'Summarize a long article in 5 bullets',b:'text',why:'Summaries are a text AI classic.'},
-  {x:'Compose a calm study beat',b:'aud',why:'Music generation is audio AI.'},
-  {x:'Design a logo idea',b:'img',why:'Visual concepts: image AI.'},
-  {x:'Build a small game in JavaScript',b:'code',why:'Code AI can scaffold a whole project.'}
- ]},
- {t:'build',title:'🎨 Image prompt lab',key:'imgPrompt'},
- {t:'lab',key:'lab4',title:'Image prompt test',goal:'Test your image prompt, then change only ONE thing.',steps:['Open an image generator (many chatbots include one). If you do not have one, ask a text chatbot: "Improve this image prompt" and compare.','Paste your prompt from the lab and generate the image.','Change only ONE thing (only the style, or only the light) and generate again.','Compare the two images.'],copy:()=>S.ans.imgPrompt,fallback:'A fox astronaut, watercolor painting, calm mood, starlight, wide landscape, purple and gold. High detail, no text in the image.',ask:'What changed when you changed only one thing? What would you try next?'},
- {t:'choice',q:'Your AI image has strange hands and the wrong colors. Best move?',opts:['Give up on image AI','Edit the prompt: add colors, camera angle, style, then generate again','Type the same prompt 20 times','Blame the computer'],a:1,why:'Change one thing, test again, compare. That is how pros work.'},
- {t:'break',title:'Stretch break! 🧘'},
- {t:'choice',q:'You must understand a 20 page PDF by tomorrow. Which tool type?',opts:['Image AI','Text AI that can read documents','Video AI','Music AI'],a:1,why:'And always ask it to point to WHERE in the document it found things, then check.'},
- {t:'lab',key:'lab5',title:'Same prompt, two tools',goal:'Different AI tools have different personalities. Compare them.',steps:['Open TWO different tools (for example ChatGPT and Gemini, or Claude and AI Studio).','Send the exact same prompt to both.','Compare: length, style, tone, accuracy.'],copy:'Explain how a rainbow forms to a 12 year old in 4 sentences, then give one fun fact.',ask:'What was different? Which tool would you pick for which kind of task?',tt:'There is no best tool. Different tools suit different jobs and change often.'},
- {t:'open',key:'wantType',q:'Which type of AI would you most like to master, and what would you create with it?',ph:'I would love to create...',min:15,after:'Great goal! Keep it for the AI Studio mission.',tt:'Write down her goal, it can become your next lesson.'}
- ]},
-/* ---------- 5 ---------- */
-{icon:'🛰️',name:'Create with AI Studio',goal:'Build your own AI helper',
- tip:'About 20 minutes. Do this live in Google AI Studio. Interfaces and model names change often, so follow what is on screen. Check account and age rules first. A smaller, narrower bot is easier to test than a big one.',
+  {t:'recap_cards',title:'🏆 Halftime High-Speed Recap',cards:[
+    {em:'🚀',t:'Autocomplete on Rocket Fuel',d:'LLMs do not have a magical crystal ball; they predict likely word patterns.'},
+    {em:'🎯',t:'RTCF Recipe',d:'Role + Task + Context + Format turns boring answers into gold.'},
+    {em:'⛓️',t:'Prompt Chaining',d:'Never dump a giant project at once. Break it into bite-sized steps.'},
+    {em:'🔍',t:'Step-by-Step Reasoning',d:'Saying "Think step by step" helps both the AI and you catch logical mistakes.'}
+  ]},
+  {t:'fast_quiz',title:'⚡ Rapid-Fire Combo Quiz',q:'Test your reflexes! 3 quick questions to bank instant bonus XP:',questions:[
+    {q:'What does an LLM actually do?',opts:['Predicts likely words by pattern','Has conscious human thoughts','Searches Wikipedia secretly'],a:0},
+    {q:'In the RTCF recipe, what does "F" stand for?',opts:['Fast','Format','Future'],a:1},
+    {q:'If you need a 5-page report, what is the smartest move?',opts:['Ask for all 5 pages at once','Ask for an outline first, then 1 section at a time'],a:1}
+  ]},
+  {t:'choice',q:'Ready to unlock the second half (AI Studio, Safety Shields, Truth Radar, & Certificate)?',opts:['Blast off into the second half! 🚀','Let’s do this! ✨'],a:0,why:'You have the foundations locked down. Now let’s build tools, guard privacy, and bust hallucinations!'}
+ ]
+},
+
+/* ---------- 5: Create with AI Studio ---------- */
+{icon:'🛰️',name:'AI Studio Lab',goal:'Build custom bots with System Instructions',
+ tip:'In Google AI Studio (aistudio.google.com), system instructions are the permanent rules of the bot.',
  steps:[
- {t:'info',title:'What is Google AI Studio?',body:`<p>A free-to-try web workspace from Google where you can experiment with <b>Gemini</b> AI models: write prompts, set rules for how the AI behaves, and even try building small apps by describing them.</p><p>Find it at <b>aistudio.google.com</b>. Menus and model names change often, so trust what you see on screen.</p><p class="muted">Account and age rules apply. If you are not sure, ask a trusted adult first.</p>`},
- {t:'choice',q:'System instructions vs a normal prompt: what is the difference?',opts:['System instructions set the AI\'s role and rules for the whole chat. A prompt is one request inside it.','They are exactly the same','System instructions are only for hackers','A prompt is just longer'],a:0,why:'System instructions are the "personality and rulebook". Prompts are the questions.'},
- {t:'botbuilder',title:'🤖 Design your own AI helper',key:'botPrompt'},
- {t:'checklist',title:'Now do it for real in AI Studio',items:['Open aistudio.google.com and sign in (check age and account rules).','Start a new chat or prompt.','Pick a model from the model selector. Any recent Gemini model is fine for this.','Find the "System instructions" box and paste the instructions you just created.','Test 1: ask an easy question your bot should handle well.','Test 2: ask something tricky.','Test 3: ask something outside its rules. Does it behave?','Change ONE rule, test again. Better or worse?','Bonus: if you see an option to describe and build an app, try one tiny idea.']},
- {t:'lab',key:'lab6',title:'With vs without system instructions',goal:'See how much system instructions change an AI\'s behavior.',steps:['In AI Studio, keep your bot with its system instructions.','Open a second chat with the system instructions box EMPTY.','Send the same question below to both.','Compare tone, length and format.'],copy:'Give me advice about studying for an exam.',ask:'How did your bot answer differently from the plain AI? Which differences came from your rules?'},
- {t:'open',key:'botReflect',q:'You tested your bot. What worked? What surprised you? Which rule would you change?',ph:'My bot...',min:20,after:'That is real AI engineering: test, observe, adjust.',tt:'Ask: which of the 3 tests was the most revealing?'},
- {t:'choice',q:'Your bot breaks a rule you wrote. Best fix?',opts:['Make the rule clearer and more specific, add an example, test again','Delete all the rules','Give up','Write the rule in capitals only'],a:0,why:'Clear, specific rules with an example beat shouting every time.'},
- {t:'poll',key:'buildIdea',q:'Next challenge: what would you build with AI Studio?',opts:['A study buddy','A story game','A language practice partner','A budget helper','Something else'],reflect:'Love it. That can be your next project.'}
- ]},
-/* ---------- 6 ---------- */
-{icon:'🛡️',name:'Shield Up',goal:'Stay safe: what never to share',
- tip:'About 12 minutes. Use real examples. Anything typed into a public tool might be stored or reviewed depending on the service and settings. If she works or will work with company or client data, stress: follow the employer rules, never paste confidential data into public tools.',
+  {t:'info',title:'System Instructions: The Secret Behind Custom AI',body:`<p>In web workspaces like <b>Google AI Studio</b>, you don\'t just ask questions—you program the AI\'s personality with <b>System Instructions</b>.</p><div class="grid"><div class="tile"><span class="em">📜</span><b>System Prompt</b><br>The permanent rules & tone (e.g. "Never give answers directly; coach in hints").</div><div class="tile"><span class="em">💬</span><b>User Prompt</b><br>The current question you ask during the conversation.</div></div>`},
+  {t:'botbuilder_quick',title:'🤖 Fast Bot Architect',key:'botPrompt'},
+  {t:'choice',q:'Your custom study bot starts giving away full math homework answers. What is your fix?',opts:['Add a rule: "Never give final answers. Provide one guiding hint at a time."','Abandon the bot','Tell it in angry all-caps during the chat'],a:0,why:'Fix the <b>System Instructions</b> with clear constraints and examples!'}
+ ]
+},
+
+/* ---------- 6: Shield Up ---------- */
+{icon:'🛡️',name:'Shield Up (Safety)',goal:'Privacy shields & what NEVER to feed an AI',
+ tip:'ADHD visual reminder: If you wouldn\'t paste it on a public bulletin board, don\'t paste it into a cloud chatbot.',
  steps:[
- {t:'info',title:'The Golden Rule 🛡️',body:`<p>Treat a chatbot like a <b>stranger wearing a very friendly mask</b>.</p><p>Depending on the service and your settings, what you type may be <b>stored, reviewed by people, or used to improve the AI</b>. So: share smart.</p>`},
- {t:'sort',q:'Safe to share, or NEVER share?',buckets:[{id:'safe',label:'Safe',icon:'🟢'},{id:'never',label:'Never share',icon:'🔴'}],items:[
-  {x:'Your favorite color',b:'safe',why:'Harmless.'},
-  {x:'Your home address',b:'never',why:'It reveals where you live.'},
-  {x:'A password or login code',b:'never',why:'Passwords are for you only. No exception.'},
-  {x:'A made-up story idea',b:'safe',why:'Invented content is fine.'},
-  {x:'A photo of your ID or passport',b:'never',why:'Identity documents can be misused for fraud.'},
-  {x:'A homework question with no names',b:'safe',why:'No personal details attached.'},
-  {x:'Your bank card number',b:'never',why:'Money details are always private.'},
-  {x:'A private screenshot of a friend\'s chat',b:'never',why:'It is their private info, not yours to share.'},
-  {x:'Medical results with your full name on them',b:'never',why:'Very personal and identifying. Ask general questions instead.'},
-  {x:'Confidential company or client data',b:'never',why:'At work, follow company AI rules. Never paste confidential data into public tools.'}
- ]},
- {t:'redact',q:'Redact it! Tap the parts that should be hidden before sending this to a chatbot.',sub:'Tap a chunk to black it out. Tap again to undo.',tokens:[['Hi! My name is',0],['Maria Ionescu',1],['I live at',0],['Strada Florilor 12',1],['in Cluj',1],['my phone is',0],['0722 000 000',1],['and I need help writing an apology to my best friend',0],['Andrei',1],['after we argued about a game.',0]]},
- {t:'choice',q:'A chatbot says: "To help you faster, send me your password." What do you do?',opts:['Send it, it is a helper','Never. No real AI helper needs your password.','Send half of it','Send an old password'],a:1,why:'Asking for passwords is a scam red flag. Stop and leave.'},
- {t:'choice',q:'A video shows a famous person saying something shocking. It might be a deepfake. First step?',opts:['Share it right now','Look for the original and check trusted sources before believing or sharing','Believe it if it looks real','Comment angrily'],a:1,why:'AI can fake faces and voices very convincingly. Verify before you spread it.'},
- {t:'info',title:'Your safety toolkit 🧰',body:`<ul><li>Use <b>placeholders</b> ("my friend A") instead of real names.</li><li>Check <b>privacy settings</b> (chat history, use of chats for training).</li><li>Never upload <b>other people's</b> private info.</li><li>Follow <b>school or work rules</b> about AI.</li><li>For <b>health, legal and money</b> decisions, ask real experts.</li><li>Unsure? Ask a <b>trusted adult</b>.</li></ul>`},
- {t:'lab',key:'lab7',title:'Privacy settings hunt',goal:'Find out what your favorite tool does with your chats, and practice placeholders.',steps:['Open the chatbot you use most and go to its settings.','Look for privacy or data controls. Is chat history saved? Is there an option about your chats being used to improve the AI? Is there a temporary or private chat mode?','Decide which settings YOU want.','Then send the placeholder prompt below. Notice that the AI can help without knowing any real names.'],copy:'My friend A is very nervous about presenting in front of the class. Give me 3 calming tips I can share with them.',ask:'What did you find in the settings, and what will you change or start doing?',tt:'Settings names change often. Let her explore and explain what she finds.'},
- {t:'open',key:'neverList',q:'Write YOUR Never Share list: 3 things you will never paste into a chatbot.',ph:'1) ... 2) ... 3) ...',min:20,after:'Shield up! Keep this list close.',tt:'Ask her for a real-life situation where she was tempted to share something.'}
- ]},
-/* ---------- 7 ---------- */
-{icon:'📡',name:'Truth Radar',goal:'Spot mistakes, bias and over-reliance',
- tip:'About 12 minutes. Run a live hallucination test: ask the chatbot for sources about a very niche topic, then check together whether those sources exist. Discuss where AI helps learning and where it replaces it.',
+  {t:'sort',q:'Safe to Share vs. NEVER Share!',buckets:[{id:'safe',label:'Safe 🟢',icon:'🟢'},{id:'never',label:'Never Share 🔴',icon:'🔴'}],items:[
+    {x:'Your home address & phone number',b:'never',why:'Private personal identity data!'},
+    {x:'A practice math question with no personal info',b:'safe',why:'Completely harmless.'},
+    {x:'Your account password or screen lock PIN',b:'never',why:'Never share credentials anywhere.'},
+    {x:'A fictional story outline about aliens',b:'safe',why:'Creative work with no private details.'},
+    {x:'A friend\'s private text messages',b:'never',why:'Other people\'s privacy is not yours to upload.'}
+  ]},
+  {t:'redact_rapid',q:'Tap the 3 dangerous pieces of private data to REDACT them:',tokens:[['Hey! My name is',0],['Alex Taylor',1],['and I live at',0],['42 Willow Creek Lane',1],['. My school student ID is',0],['#99421',1],['. Can you help me organize my science project notes?',0]]},
+  {t:'choice',q:'A video on TikTok appears showing a celebrity endorsing a weird product. What should you do first?',opts:['Verify with trusted news sources—it could easily be an AI deepfake','Share it immediately with friends','Assume it must be real if their lips match'],a:0,why:'AI video & voice cloning can generate believable deepfakes in seconds. Always verify first!'}
+ ]
+},
+
+/* ---------- 7: Truth Radar ---------- */
+{icon:'📡',name:'Truth Radar',goal:'Spot hallucinations and guard your brain against lazy bias',
+ tip:'Key principle: AI is a cognitive partner, not an automatic brain replacement.',
  steps:[
- {t:'info',title:'3 traps to dodge',body:`<div class="grid"><div class="tile"><span class="em">🌀</span><b>Hallucinations</b><br>Made-up facts, quotes or sources.</div><div class="tile"><span class="em">⚖️</span><b>Bias</b><br>Learned from human data, so it can repeat stereotypes.</div><div class="tile"><span class="em">🛋️</span><b>Over-reliance</b><br>If AI does all the thinking, your brain gets lazy.</div></div>`},
- {t:'choice',q:'AI gives you a quote with a link to a study. You click and the page does not exist. What probably happened?',opts:['The internet is broken','A hallucination: it generated a believable-looking source','The study was deleted by aliens','Your browser is slow'],a:1,why:'Always check that sources really exist.'},
- {t:'multi',key:'factCheck',q:'Which are GOOD ways to fact check an AI answer? Pick all that apply.',opts:['Search the claim in trusted sources','Ask the AI "are you sure?" and believe the next answer','Check that cited sources really exist','Compare with a textbook or official website','Trust it because it sounds confident','Ask the AI which parts it is unsure about'],min:1,correct:[0,2,3,5],after:'Verification is a superpower.'},
- {t:'lab',key:'lab8',title:'Hallucination hunt',goal:'Catch an AI making things up, safely.',steps:['Send the prompt below to a chatbot.','For each study it lists, search the title on Google or Google Scholar. Mark it: real, fake, or cannot find.','Then ask the AI: "Are these all real? Which ones are you unsure about?"','Notice how it reacts when challenged.'],copy:'Give me 3 scientific studies, with authors, year and a link, about how teenagers use AI for studying.',ask:'How many studies were real? What did the AI say when you challenged it?',tt:'Results vary. If everything is real, the lesson is still: verify before trusting.'},
- {t:'break',title:'Quick reset 🌬️'},
- {t:'choice',q:'You ask for "a picture of a scientist" ten times and always get a similar kind of person. What is going on?',opts:['Pure coincidence','Bias from training data. Fix it by being specific about who and what you want.','The AI is lazy','Science is only for one type of person'],a:1,why:'Defaults come from the data it learned. Question them and steer with your prompt.'},
- {t:'choice',q:'Homework: write an essay. Which use of AI is smartest for LEARNING?',opts:['Ask AI to write it and submit it','Write your own draft, ask AI to quiz you and give feedback, and understand your mistakes','Copy from AI but change a few words','Ask AI to do all my homework at once'],a:1,why:'Use AI as a coach, not a substitute. Also check your school rules.'},
- {t:'open',key:'doMyself',q:'One thing I will always do myself and not outsource to AI is... and why.',ph:'I will always...',min:15,after:'Great boundary. That is critical thinking in action.',tt:'Ask: when does AI make you smarter, and when does it make you lazier?'}
- ]},
-/* ---------- 8 ---------- */
-{icon:'✨',name:'Power Moves',goal:'Become a lifelong AI pro',
- tip:'About 10 minutes. Print the certificate. Use the "Show all my answers" panel on the last screen to see what to revisit next lesson. Tools change fast, but the skills (clear thinking, specifying, checking) last.',
+  {t:'choice',q:'An AI gives you 3 scientific citations with academic authors, but when you search Google, none exist. What happened?',opts:['A classic Hallucination (the model generated plausible-sounding citations)','Google’s search index is broken','The government deleted the studies'],a:0,why:'Because LLMs predict probable words, they can invent citations with realistic names and dates!'},
+  {t:'multi',key:'radarCheck',q:'Which of these are PRO methods to verify suspicious AI claims? (Pick all good moves)',opts:['Check claims against official textbooks or known trusted websites','Search the specific paper titles in Google Scholar','Ask the AI: "Are you sure? What parts might be speculative?"','Believe it because it wrote 4 paragraphs without typos'],correct:[0,1,2],after:'Always inspect sources outside the chatbot sandbox!'},
+  {t:'open',key:'doMyself',q:'One thing you will ALWAYS do with your own brain, and never blindly delegate to an AI:',ph:'I will always...',chips:['Forming my personal ethical opinions','Writing heartfelt messages to real friends','Verifying crucial medical or financial facts'],after:'That boundary is what separates an AI pioneer from someone on autopilot.'}
+ ]
+},
+
+/* ---------- 8: Power Moves & Graduation ---------- */
+{icon:'✨',name:'Power Moves',goal:'Lock in your superpower prompts & claim your certificate',
+ tip:'Final payoff: Celebrate completion and print the official Certificate.',
  steps:[
- {t:'multi',key:'powerPhrases',q:'Pick your 3 favorite POWER PHRASES to keep.',opts:['"Ask me questions before you answer."','"Explain it like I am 12."','"Give me 3 options and compare them."','"What could be wrong with this answer?"','"Quiz me on this, one question at a time."','"Show your reasoning step by step."','"Summarize in 5 bullets."'],min:3,max:3,after:'Excellent. Try them in your next real chat.'},
- {t:'order',q:'Put a smart AI conversation in the right order. Tap the steps one by one.',items:['Set the role and goal','Add context and format','Read the answer critically','Ask a follow-up to improve it','Fact check what matters','Save the prompt that worked']},
- {t:'choice',q:'Which habit makes you better at AI over the next year?',opts:['Experimenting often and keeping a prompt notebook','Memorizing one perfect prompt','Never using it','Using only one tool forever'],a:0,why:'Tools change every few months. Your skills stay: clear thinking, specifying, checking.'},
- {t:'scale',key:'trustAfter',q:'Now again: how much do you trust what a chatbot tells you?',lo:'Not at all',hi:'Completely',after:v=>{const b=S.ans.trustBefore; if(b==null) return 'Saved.'; return `Before: <b>${b}/10</b> → Now: <b>${v}/10</b>. ${v<b?'Healthy skepticism unlocked.':v>b?'More trust is fine if it is earned by checking.':'Same level, but now you know why.'}`;}},
- {t:'open',key:'whatAI2',q:'So... what does AI mean to you now? Compare it with your first answer.',prev:'whatAI',ph:'Now I think AI is...',min:20,after:'That growth is the whole point of today.',tt:'Ask what changed the most.'},
- {t:'lab',key:'lab9',title:'Quiz me!',goal:'Use AI as a coach: let it test what you learned today.',steps:['Open a chatbot and send the prompt below.','Answer its questions one by one, in your own words.','Try one of your favorite power phrases, like "Explain it like I am 12" or "What could be wrong with this answer?"'],copy:'Quiz me on what I learned today about AI: prompts, safety and fact checking. Ask one question at a time, wait for my answer, then give feedback.',ask:'Which power phrase did you try, and how did it go? What did the quiz reveal that you still want to practice?'},
- {t:'rules',title:'📜 Write your personal AI Rulebook'},
- {t:'cert'}
- ]}
+  {t:'multi',key:'powerPhrases',q:'Pick your 3 favorite POWER PHRASES for your daily toolkit:',opts:[
+    '"Explain like I\'m 13 with a concrete real-world analogy."',
+    '"What could be missing, biased, or mistaken in your answer?"',
+    '"Think step by step and show intermediate reasoning."',
+    '"Ask me 3 questions first before answering."',
+    '"Give me 2 distinct options and compare pros and cons in a table."'
+  ],min:3,max:3,after:'These 3 prompts alone will save you hours of frustration.'},
+  {t:'rules_quick',title:'📜 Your Cosmic AI Rulebook'},
+  {t:'scale',key:'trustAfter',q:'Final check-in: How much do you trust AI outputs now?',lo:'Skeptical & Verifying',hi:'Blindly Trusting',after:v=>`Logged: ${v}/10. Healthy skepticism paired with smart prompting is the goal!`},
+  {t:'cert'}
+ ]
+}
 ];
 
-/* ================= step renderers ================= */
-const PASSIVE=new Set(['info','break','toolkit']);
-const T={};
+/* ================= Custom Step Type Implementations ================= */
+const PASSIVE = new Set(['info','toolkit','recap_cards']);
+const T = {};
 
-T.info=(st,el)=>{ el.innerHTML=`<h3>${st.title}</h3><div class="rich">${st.body}</div>`; };
-
-T.name=(st,el,api)=>{
-  el.innerHTML=`<h3>${st.title}</h3><div class="rich">${st.body}</div><div class="row"><input id="nm" class="inp" maxlength="30" placeholder="Your name or space nickname" value="${esc(S.name)}"><button class="primary" id="go">Launch 🚀</button></div><div class="fb"></div>`;
-  const go=()=>{ const v=$('#nm',el).value.trim(); if(!v){ fb(el,false,'Type a name first, any name you like.'); return; }
-    S.name=v; save(); api.done(5); fb(el,true,`Welcome aboard, <b>${esc(v)}</b>! Press Next.`); burst($('#go',el)); };
-  $('#go',el).onclick=go; $('#nm',el).onkeydown=e=>{ if(e.key==='Enter') go(); };
+T.info = (st,el,api) => {
+  el.innerHTML = `<h3>${st.title}</h3><div class="rich">${st.body}</div>`;
 };
 
-T.choice=(st,el,api)=>{
-  let tries=0, solved=false;
-  el.innerHTML=`<h3>${st.q}</h3><div class="opts">${st.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div><div class="fb"></div>`;
-  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
-    if(solved) return; const i=+b.dataset.i; tries++;
-    if(i===st.a){ solved=true; b.classList.add('right'); fb(el,true,st.why); burst(b); api.done(tries===1?10:5); }
-    else { b.classList.add('wrong'); b.disabled=true; fb(el,false,'Not quite. Have another look, you can try again.'); }
-  });
+T.name = (st,el,api) => {
+  el.innerHTML = `
+    <h3>${st.title}</h3>
+    <div class="rich">${st.body}</div>
+    <div class="row">
+      <input id="nm" class="inp" maxlength="30" placeholder="Type your space explorer name..." value="${esc(S.name||'')}">
+      <button class="primary" id="go">Blast Off 🚀</button>
+    </div>
+    <div class="fb"></div>`;
+  const go = () => {
+    const v = $('#nm',el).value.trim() || 'Cosmic Pioneer';
+    S.name = v; save();
+    soundFX.success();
+    burst($('#go',el));
+    api.done(15);
+    fb(el, true, `Welcome aboard, <b>${esc(v)}</b>! Tap <i>Next</i> to launch.`);
+  };
+  $('#go',el).onclick = go;
+  $('#nm',el).onkeydown = e => { if(e.key === 'Enter') go(); };
 };
 
-T.poll=(st,el,api)=>{
-  el.innerHTML=`<h3>${st.q}</h3><div class="chips">${st.opts.map((o,i)=>`<button class="chipb" data-i="${i}">${o}</button>`).join('')}</div><div class="fb"></div>`;
-  el.querySelectorAll('.chipb').forEach(b=>b.onclick=()=>{
-    el.querySelectorAll('.chipb').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-    S.ans[st.key]=st.opts[+b.dataset.i]; save(); fb(el,true,st.reflect); burst(b); api.done(10);
-  });
-};
-
-T.multi=(st,el,api)=>{
-  const sel=new Set(); let fails=0;
-  el.innerHTML=`<h3>${st.q}</h3><div class="chips">${st.opts.map((o,i)=>`<button class="chipb" data-i="${i}">${o}</button>`).join('')}</div><button class="primary" id="chk">Lock it in</button><div class="fb"></div>`;
-  const chips=[...el.querySelectorAll('.chipb')];
-  chips.forEach(b=>b.onclick=()=>{
-    const i=+b.dataset.i;
-    if(sel.has(i)){ sel.delete(i); b.classList.remove('on'); }
-    else { if(st.max && sel.size>=st.max){ b.classList.add('shake'); setTimeout(()=>b.classList.remove('shake'),400); return; } sel.add(i); b.classList.add('on'); }
-  });
-  $('#chk',el).onclick=()=>{
-    const need=st.min||1;
-    if(sel.size<need){ fb(el,false,`Pick at least ${need}.`); return; }
-    if(st.correct){
-      const ok=[...sel].filter(i=>st.correct.includes(i)).length, wrong=sel.size-ok, miss=st.correct.length-ok;
-      if(wrong===0 && miss===0){ fb(el,true,'Perfect radar! '+st.after); burst($('#chk',el)); S.ans[st.key]=[...sel].map(i=>st.opts[i]); save(); api.done(15); return; }
-      fails++;
-      if(fails>=2){ chips.forEach((b,i)=>{ b.classList.remove('on'); if(st.correct.includes(i)) b.classList.add('ok'); });
-        fb(el,true,'Here are the good ones, highlighted in green. '+st.after); S.ans[st.key]=st.correct.map(i=>st.opts[i]); save(); api.done(5); return; }
-      fb(el,false,`Close! ${wrong} of your picks ${wrong===1?'is':'are'} not a good idea and you missed ${miss}. Adjust and lock in again.`); return;
+T.choice = (st,el,api) => {
+  let solved = false;
+  el.innerHTML = `
+    <h3>${st.q}</h3>
+    <div class="opts">
+      ${st.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="fb"></div>`;
+  el.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    Tone.start();
+    const i = +b.dataset.i;
+    if(i === st.a){
+      if(!solved){
+        solved = true;
+        b.classList.add('right');
+        soundFX.success();
+        burst(b);
+        api.addStreak();
+        api.done(15);
+      }
+      fb(el, true, st.why || 'Spot on!');
+    } else {
+      b.classList.add('wrong');
+      soundFX.click();
+      fb(el, false, 'Not quite that one! Try another button or feel free to skip ahead anytime.');
     }
-    S.ans[st.key]=[...sel].map(i=>st.opts[i]); save(); fb(el,true,st.after); burst($('#chk',el)); api.done(10);
+  });
+};
+
+T.open = (st,el,api) => {
+  const chipsHtml = (st.chips && st.chips.length) ? `
+    <div class="muted" style="margin-top:6px">Or tap an idea to fill instantly:</div>
+    <div class="pill-row">
+      ${st.chips.map(c=>`<button class="pill-btn" data-c="${esc(c)}">${esc(c)}</button>`).join('')}
+    </div>` : '';
+
+  el.innerHTML = `
+    <h3>${st.q}</h3>
+    <textarea id="ta" placeholder="${esc(st.ph||'Your thoughts...')}">${esc(S.ans[st.key]||'')}</textarea>
+    ${chipsHtml}
+    <div class="row">
+      <button class="primary" id="sv">Save Answer ✨</button>
+      <span class="muted" id="status"></span>
+    </div>
+    <div class="fb"></div>`;
+  
+  const ta = $('#ta',el);
+  el.querySelectorAll('.pill-btn').forEach(btn => btn.onclick = () => {
+    ta.value = btn.dataset.c;
+    soundFX.click();
+  });
+
+  $('#sv',el).onclick = () => {
+    Tone.start();
+    const val = ta.value.trim() || '(Skipped with blank)';
+    S.ans[st.key] = val; save();
+    soundFX.success();
+    burst($('#sv',el));
+    api.done(15);
+    fb(el, true, st.after || 'Answer recorded! Great work.');
   };
 };
 
-T.scale=(st,el,api)=>{
-  el.innerHTML=`<h3>${st.q}</h3><div class="scalev" id="sv">5</div><input class="range" id="rg" type="range" min="0" max="10" value="5"><div class="scalel"><span>${st.lo}</span><span>${st.hi}</span></div><div class="row"><button class="primary" id="lk">Lock it in</button></div><div class="fb"></div>`;
-  $('#rg',el).oninput=e=>{ $('#sv',el).textContent=e.target.value; };
-  $('#lk',el).onclick=()=>{ const v=+$('#rg',el).value; S.ans[st.key]=v; save(); fb(el,true,st.after(v)); burst($('#lk',el)); api.done(10); };
-};
-
-T.open=(st,el,api)=>{
-  const prev=st.prev&&S.ans[st.prev]?`<div class="muted">Your first answer was:</div><div class="quote">${esc(S.ans[st.prev])}</div>`:'';
-  el.innerHTML=`<h3>${st.q}</h3>${prev}<textarea id="ta" placeholder="${esc(st.ph||'')}">${esc(S.ans[st.key]||'')}</textarea><div class="row"><button class="primary" id="sv">Save my answer</button><span class="muted" id="ct"></span></div><div class="fb"></div>`;
-  const ta=$('#ta',el), ct=$('#ct',el), btn=$('#sv',el);
-  const upd=()=>{ const n=ta.value.trim().length; ct.textContent=n>=st.min?'Ready ✓':`${n}/${st.min} characters`; };
-  ta.oninput=upd; upd();
-  btn.onclick=()=>{ if(ta.value.trim().length<st.min){ fb(el,false,'Say a little more, a sentence is enough.'); return; }
-    S.ans[st.key]=ta.value.trim(); save(); fb(el,true,st.after); burst(btn); api.done(15); };
-};
-
-T.sort=(st,el,api)=>{
-  const items=shuffle(st.items.slice()); let i=0, first=0, tried=false;
-  const draw=()=>{
-    if(i>=items.length){
-      el.innerHTML=`<h3>Round complete! 🎉</h3><p class="big">You got <b>${first}</b> of ${items.length} on the first try.</p><p class="muted">Press Next to continue.</p>`;
-      api.done(first*3+5); burst($('h3',el)); return;
+T.multi = (st,el,api) => {
+  const sel = new Set();
+  el.innerHTML = `
+    <h3>${st.q}</h3>
+    <div class="chips">
+      ${st.opts.map((o,i)=>`<button class="chipb" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="row">
+      <button class="primary" id="chk">Lock Selection</button>
+    </div>
+    <div class="fb"></div>`;
+  
+  const chips = [...el.querySelectorAll('.chipb')];
+  chips.forEach(b => b.onclick = () => {
+    Tone.start(); soundFX.click();
+    const i = +b.dataset.i;
+    if(sel.has(i)){ sel.delete(i); b.classList.remove('on'); }
+    else {
+      if(st.max && sel.size >= st.max){
+        b.classList.add('shake');
+        setTimeout(()=>b.classList.remove('shake'),350);
+        return;
+      }
+      sel.add(i); b.classList.add('on');
     }
-    const it=items[i]; tried=false;
-    el.innerHTML=`<h3>${st.q}</h3><div class="pg">Card ${i+1} of ${items.length}</div><div class="sortcard">${esc(it.x)}</div><div class="buckets">${st.buckets.map(b=>`<button class="bucket" data-b="${b.id}">${b.icon} ${b.label}</button>`).join('')}</div><div class="fb"></div>`;
-    el.querySelectorAll('.bucket').forEach(btn=>btn.onclick=()=>{
-      if(btn.dataset.b===it.b){
-        if(!tried) first++;
-        el.querySelectorAll('.bucket').forEach(x=>x.disabled=true);
-        fb(el,true,esc(it.why||'Yes!')+'<br><button class="primary small" id="nc" style="margin-top:8px">Next card →</button>'); burst(btn);
-        $('#nc',el).onclick=()=>{ i++; draw(); };
-      } else { tried=true; btn.classList.add('wrong'); btn.disabled=true; fb(el,false,'Not that one. Try another bucket.'); }
+  });
+
+  $('#chk',el).onclick = () => {
+    Tone.start();
+    if(st.correct){
+      const ok = [...sel].filter(i => st.correct.includes(i)).length;
+      const wrong = sel.size - ok;
+      if(ok >= 1 && wrong === 0){
+        soundFX.success(); burst($('#chk',el));
+        api.addStreak(); api.done(20);
+        fb(el, true, st.after || 'Radar accurate!');
+      } else {
+        chips.forEach((b,i) => {
+          if(st.correct.includes(i)) b.classList.add('ok');
+        });
+        soundFX.click(); api.done(10);
+        fb(el, true, 'Great effort! We highlighted the verified picks in green for you.');
+      }
+    } else {
+      soundFX.success(); burst($('#chk',el));
+      api.done(15);
+      fb(el, true, st.after || 'Selections saved!');
+    }
+    S.ans[st.key] = [...sel].map(i => st.opts[i]); save();
+  };
+};
+
+T.scale = (st,el,api) => {
+  el.innerHTML = `
+    <h3>${st.q}</h3>
+    <div class="scalev" id="sv">5</div>
+    <input class="range" id="rg" type="range" min="0" max="10" value="5">
+    <div class="scalel"><span>${st.lo}</span><span>${st.hi}</span></div>
+    <div class="row" style="margin-top:16px">
+      <button class="primary" id="lk">Lock In Rating</button>
+    </div>
+    <div class="fb"></div>`;
+  $('#rg',el).oninput = e => { $('#sv',el).textContent = e.target.value; };
+  $('#lk',el).onclick = () => {
+    Tone.start();
+    const v = +$('#rg',el).value;
+    S.ans[st.key] = v; save();
+    soundFX.success(); burst($('#lk',el));
+    api.done(15);
+    fb(el, true, typeof st.after === 'function' ? st.after(v) : st.after);
+  };
+};
+
+T.sort = (st,el,api) => {
+  const items = shuffle(st.items.slice());
+  let i = 0, correctCount = 0;
+  const draw = () => {
+    if(i >= items.length){
+      el.innerHTML = `
+        <h3>Sorting Complete! 🎉</h3>
+        <p class="big">You classified <b>${correctCount}</b> out of ${items.length} correctly!</p>
+        <p class="muted">Press <b>Next</b> to roll into the next challenge.</p>`;
+      burst($('h3',el)); soundFX.combo();
+      api.done(25); api.addStreak();
+      return;
+    }
+    const it = items[i];
+    el.innerHTML = `
+      <h3>${st.q}</h3>
+      <div class="muted">Card ${i+1} of ${items.length}</div>
+      <div class="sortcard">${esc(it.x)}</div>
+      <div class="buckets">
+        ${st.buckets.map(b => `<button class="bucket" data-b="${b.id}">${b.icon} ${b.label}</button>`).join('')}
+      </div>
+      <div class="fb"></div>`;
+
+    el.querySelectorAll('.bucket').forEach(btn => btn.onclick = () => {
+      Tone.start();
+      if(btn.dataset.b === it.b){
+        correctCount++;
+        soundFX.success(); burst(btn);
+        el.querySelectorAll('.bucket').forEach(x => x.disabled = true);
+        fb(el, true, `${esc(it.why || 'Correct!')}<br><button class="primary" id="nc" style="margin-top:10px;padding:6px 14px;font-size:0.9rem">Next Card →</button>`);
+        $('#nc',el).onclick = () => { i++; draw(); };
+      } else {
+        soundFX.click();
+        btn.classList.add('wrong');
+        fb(el, false, 'Not quite! Try the other category or tap it again.');
+      }
     });
   };
   draw();
 };
 
-T.redact=(st,el,api)=>{
-  const hid=new Set(); let fails=0;
-  el.innerHTML=`<h3>${st.q}</h3><p class="muted">${st.sub}</p><div class="redact">${st.tokens.map((t,i)=>`<button class="tok" data-i="${i}">${esc(t[0])}</button>`).join(' ')}</div><button class="primary" id="chk">Check my edit</button><div class="fb"></div>`;
-  el.querySelectorAll('.tok').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; if(hid.has(i)){hid.delete(i);b.classList.remove('hid');}else{hid.add(i);b.classList.add('hid');} });
-  $('#chk',el).onclick=()=>{
-    const miss=st.tokens.filter((t,i)=>t[1]&&!hid.has(i)).length, over=st.tokens.filter((t,i)=>!t[1]&&hid.has(i)).length;
-    if(!miss&&!over){
-      const safe=st.tokens.map(t=>t[1]?'[PRIVATE]':t[0]).join(' ');
-      fb(el,true,`Perfect! The AI can still help, and nobody's private info is exposed:<div class="out">${esc(safe)}</div>`); burst($('#chk',el)); api.done(20); return;
+T.rewrite = (st,el,api) => {
+  const templates = st.templates || [];
+  const chips = templates.map(t => `<button class="pill-btn" data-t="${esc(t)}">Use Template: "${esc(t.slice(0,38))}..."</button>`).join('');
+
+  el.innerHTML = `
+    <h3>${st.q}</h3>
+    ${st.bad ? `<div class="bad-prompt">❌ Weak: <i>"${esc(st.bad)}"</i></div>` : ''}
+    <textarea id="ta" placeholder="${esc(st.ph||'Draft your prompt here...')}">${esc(S.ans[st.key]||'')}</textarea>
+    ${templates.length ? `<div class="muted">Or 1-click a power template:</div><div class="pill-row">${chips}</div>` : ''}
+    <div class="row">
+      <button class="primary" id="ck">Check Prompt Strength</button>
+    </div>
+    <ul class="crit" id="cr"></ul>
+    <div class="fb"></div>`;
+
+  const ta = $('#ta',el);
+  el.querySelectorAll('.pill-btn').forEach(btn => btn.onclick = () => {
+    ta.value = btn.dataset.t; soundFX.click();
+  });
+
+  const check = () => {
+    Tone.start();
+    const t = ta.value.trim();
+    if(!t){ fb(el, false, 'Type a prompt or click one of the template pills!'); return; }
+    S.ans[st.key] = t; save();
+    const met = CRIT.filter(c => c.test(t)).length;
+    $('#cr',el).innerHTML = CRIT.map(c => `<li>${c.test(t)?'✅':'⬜'} ${c.label}</li>`).join('');
+    if(met >= 2){
+      soundFX.success(); burst($('#ck',el));
+      api.addStreak(); api.done(20);
+      fb(el, true, `High impact prompt! Detected ${met} power ingredients.`);
+    } else {
+      soundFX.click(); api.done(10);
+      fb(el, true, 'Great draft! Keep it or try adding a role or a format constraint.');
     }
-    fails++;
-    if(fails>=3){ const safe=st.tokens.map(t=>t[1]?'[PRIVATE]':t[0]).join(' ');
-      fb(el,true,`Here is a safe version. Names, places, phone numbers and other people's details get hidden:<div class="out">${esc(safe)}</div>`); api.done(8); return; }
-    fb(el,false,(miss?`You missed ${miss} private ${miss===1?'part':'parts'}. `:'')+(over?`You hid ${over} ${over===1?'part':'parts'} that ${over===1?'is':'are'} actually fine to keep. `:'')+'Try again.');
   };
+  $('#ck',el).onclick = check;
 };
 
-T.rewrite=(st,el,api)=>{
-  let tries=0; const C=st.crit||CRIT;
-  el.innerHTML=`<h3>${st.q}</h3>${st.bad?`<div class="bad-prompt">❌ <i>"${esc(st.bad)}"</i></div>`:''}<textarea id="ta" placeholder="${esc(st.ph||'')}">${esc(S.ans[st.key]||'')}</textarea><div class="row"><button class="primary" id="ck">Check my prompt</button></div><ul class="crit" id="cr"></ul><div class="fb"></div>`;
-  const draw=(t)=>{ $('#cr',el).innerHTML=C.map(c=>{const ok=t&&c.test(t);return `<li>${ok?'✅':'⬜'} ${c.label}${ok?'':`<span class="tip">${c.tip}</span>`}</li>`;}).join(''); };
-  draw('');
-  $('#ck',el).onclick=()=>{
-    const t=$('#ta',el).value.trim();
-    if(t.length<10){ fb(el,false,'Write a prompt first.'); return; }
-    tries++; S.ans[st.key]=t; save(); draw(t);
-    const met=C.filter(c=>c.test(t)).length, need=st.need||3;
-    const ex=st.example?`<br><br><b>One possible version:</b><div class="out">${esc(st.example)}</div>`:'';
-    if(met>=need){ fb(el,true,`${met} of ${C.length} ingredients. Strong prompt!${ex}<br><span class="muted">This checker only spots keywords. The real test is the answer you get. Try it in a chatbot!</span>`); burst($('#ck',el)); api.done(10+met*3); }
-    else if(tries>=3){ fb(el,true,`You have ${met} of ${C.length}. Good effort, take a look at an example and continue.${ex}`); api.done(5); }
-    else fb(el,false,`${met} of ${C.length} ingredients. Add${need-met} more ingredient${need-met>1?'s':''} (see the tips above) and check again.`);
-  };
-};
+T.order = (st,el,api) => {
+  let seq = [];
+  const pool = shuffle(st.items.map((x,i)=>({x,i})));
+  const draw = () => {
+    const left = pool.filter(p => !seq.includes(p));
+    el.innerHTML = `
+      <h3>${st.q}</h3>
+      <div class="seq">
+        ${seq.map((p,idx)=>`<div>${idx+1}. ${esc(p.x)}</div>`).join('')}
+      </div>
+      <div class="opts">
+        ${left.map(p => `<button class="opt" data-i="${p.i}">+ ${esc(p.x)}</button>`).join('')}
+      </div>
+      <div class="row">
+        <button class="ghost" id="un">Undo</button>
+        <button class="ghost" id="rs">Reset</button>
+        <button class="primary" id="ck" ${seq.length < st.items.length ? 'disabled' : ''}>Check Sequence</button>
+      </div>
+      <div class="fb"></div>`;
 
-T.build=(st,el,api)=>{
-  const opt=a=>a.map(x=>`<option>${x}</option>`).join('');
-  el.innerHTML=`<h3>${st.title}</h3><p class="muted">Build an image prompt piece by piece, then try it in any image generator you have access to.</p>
-   <label class="f">Subject</label><input class="inp" id="b1" placeholder="a fox astronaut" maxlength="80">
-   <label class="f">Style</label><select id="b2">${opt(['watercolor painting','soft 3D animated film style','pixel art','oil painting','anime-inspired illustration','realistic photograph','paper cut-out collage','neon cyberpunk poster'])}</select>
-   <label class="f">Mood</label><select id="b3">${opt(['calm','mysterious','joyful','epic','cozy','spooky'])}</select>
-   <label class="f">Light</label><select id="b4">${opt(['golden hour light','moonlight','neon glow','soft studio light','dramatic shadows','starlight'])}</select>
-   <label class="f">Shot</label><select id="b5">${opt(['close-up portrait','wide landscape','bird\'s eye view','low angle hero shot','centered symmetrical composition'])}</select>
-   <label class="f">Extra details (colors, objects)</label><input class="inp" id="b6" placeholder="purple and gold, floating lanterns" maxlength="100">
-   <div class="muted" style="margin-top:12px">Your prompt:</div><div class="out" id="outp"></div>
-   <div class="row"><button class="ghost" id="cp">Copy prompt</button><button class="primary" id="lk">I am ready to test it</button></div>
-   <p class="muted">Challenge: generate it, then change ONE thing (only the style, or only the light) and compare.</p><div class="fb"></div>`;
-  const make=()=>{ const g=i=>$('#b'+i,el).value.trim(); const sub=g(1)||'(your subject)'; const ex=g(6);
-    return `${sub}, ${g(2)}, ${g(3)} mood, ${g(4)}, ${g(5)}${ex?', '+ex:''}. High detail, no text in the image.`; };
-  const upd=()=>{ $('#outp',el).textContent=make(); };
-  el.querySelectorAll('input,select').forEach(x=>x.oninput=upd); upd();
-  $('#cp',el).onclick=e=>copyText(make(),e.target);
-  $('#lk',el).onclick=()=>{ if($('#b1',el).value.trim().length<3){ fb(el,false,'Add a subject first.'); return; }
-    S.ans.imgPrompt=make(); save(); fb(el,true,'Great prompt! Test it now and compare with the plain version of just your subject.'); burst($('#lk',el)); api.done(20); };
-};
-
-T.botbuilder=(st,el,api)=>{
-  const opt=a=>a.map(x=>`<option>${x}</option>`).join('');
-  el.innerHTML=`<h3>${st.title}</h3><p class="muted">Fill this in and I will write the system instructions for you to paste into AI Studio.</p>
-   <label class="f">Bot name</label><input class="inp" id="c1" placeholder="Nova" maxlength="40">
-   <label class="f">Who does it help?</label><input class="inp" id="c2" placeholder="teenagers learning English" maxlength="80">
-   <label class="f">What is its job?</label><input class="inp" id="c3" placeholder="practice conversation and gently fix mistakes" maxlength="120">
-   <label class="f">Personality</label><select id="c4">${opt(['friendly','funny','calm and patient','strict coach','curious explorer'])}</select>
-   <label class="f">Answer style</label><select id="c5">${opt(['short answers, max 5 sentences','step by step','bullet points','always end with one question for me'])}</select>
-   <label class="f">Your rules (one per line)</label><textarea id="c6" placeholder="Never give the full answer at once&#10;Always explain mistakes kindly"></textarea>
-   <div class="muted" style="margin-top:12px">Your system instructions:</div><div class="out" id="outp"></div>
-   <div class="row"><button class="ghost" id="cp">Copy instructions</button><button class="primary" id="lk">Lock in my bot</button></div><div class="fb"></div>`;
-  const make=()=>{ const g=i=>$('#c'+i,el).value.trim();
-    const rules=g(6).split('\n').map(s=>s.trim()).filter(Boolean).map(s=>'- '+s).join('\n');
-    return `You are ${g(1)||'(name)'}, a ${g(4)} AI helper for ${g(2)||'(who)'}.\nYour job: ${g(3)||'(job)'}.\nRules:\n${rules?rules+'\n':''}- If you are not sure about something, say so instead of guessing.\n- Never ask for personal data like full names, addresses or passwords.\nAnswer style: ${g(5)}.`; };
-  const upd=()=>{ $('#outp',el).textContent=make(); };
-  el.querySelectorAll('input,select,textarea').forEach(x=>x.oninput=upd); upd();
-  $('#cp',el).onclick=e=>copyText(make(),e.target);
-  $('#lk',el).onclick=()=>{ if([1,2,3].some(i=>$('#c'+i,el).value.trim().length<2)){ fb(el,false,'Fill in the name, who it helps, and its job.'); return; }
-    S.ans.botPrompt=make(); save(); fb(el,true,'Your AI helper is designed! Copy the instructions and use them in the next step.'); burst($('#lk',el)); api.done(25); };
-};
-
-T.checklist=(st,el,api)=>{
-  el.innerHTML=`<h3>${st.title}</h3><p class="muted">Tick each step as you do it.</p>${st.items.map((x,i)=>`<label class="chk"><input type="checkbox" data-i="${i}"><span>${esc(x)}</span></label>`).join('')}<div class="fb"></div>`;
-  const boxes=[...el.querySelectorAll('input')];
-  boxes.forEach(b=>b.onchange=()=>{ const n=boxes.filter(x=>x.checked).length;
-    if(n===boxes.length){ fb(el,true,'Mission accomplished! You built and tested your own AI helper. 🛰️'); burst(b); api.done(15); }
-    else fb(el,true,`${n} of ${boxes.length} done.`); });
-};
-
-T.order=(st,el,api)=>{
-  let seq=[], fails=0; const n=st.items.length; const pool=shuffle(st.items.map((x,i)=>({x,i})));
-  const draw=(marks)=>{
-    const left=pool.filter(p=>!seq.includes(p));
-    el.innerHTML=`<h3>${st.q}</h3><div class="seq">${seq.map((p,k)=>`<div class="${marks?(marks[k]?'okp':'nop'):''}">${k+1}. ${esc(p.x)}</div>`).join('')}</div>
-      <div class="opts">${left.map(p=>`<button class="opt" data-i="${p.i}">${esc(p.x)}</button>`).join('')}</div>
-      <div class="row"><button class="ghost" id="un">↩ Undo</button><button class="ghost" id="rs">Reset</button><button class="primary" id="ck" ${seq.length<n?'disabled':''}>Check order</button></div><div class="fb"></div>`;
-    el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ seq.push(pool.find(p=>p.i===+b.dataset.i)); draw(); });
-    $('#un',el).onclick=()=>{ seq.pop(); draw(); }; $('#rs',el).onclick=()=>{ seq=[]; draw(); };
-    $('#ck',el).onclick=()=>{
-      const marks=seq.map((p,k)=>p.i===k), right=marks.filter(Boolean).length;
-      if(right===n){ draw(marks); fb(el,true,'Perfect order! That is a real pro workflow.'); burst($('#ck',el)); api.done(20); return; }
-      fails++;
-      if(fails>=2){ seq=st.items.map((x,i)=>({x,i})); draw(seq.map(()=>true)); fb(el,true,'Here is the best order. Notice that checking facts and saving what worked are part of the process.'); api.done(8); return; }
-      draw(marks); fb(el,false,`${right} of ${n} are in the right place (green). Use Undo or Reset and rearrange.`);
+    el.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      Tone.start(); soundFX.click();
+      seq.push(pool.find(p => p.i === +b.dataset.i));
+      draw();
+    });
+    $('#un',el).onclick = () => { seq.pop(); draw(); };
+    $('#rs',el).onclick = () => { seq = []; draw(); };
+    $('#ck',el).onclick = () => {
+      Tone.start();
+      const right = seq.filter((p,idx) => p.i === idx).length;
+      if(right === st.items.length){
+        soundFX.combo(); burst($('#ck',el));
+        api.addStreak(); api.done(25);
+        fb(el, true, 'Flawless workflow order!');
+      } else {
+        soundFX.success(); api.done(10);
+        fb(el, true, `${right} of ${st.items.length} matched. You still grasp the chain concept—press Next when ready!`);
+      }
     };
   };
   draw();
 };
 
-T.rules=(st,el,api)=>{
-  const r=S.ans.rules||['','',''], gold=S.ans.golden||'';
-  el.innerHTML=`<h3>${st.title}</h3><p class="muted">Three rules for how YOU will use AI from now on, plus one golden rule.</p>
-   ${[0,1,2].map(i=>`<label class="f">Rule ${i+1}</label><input class="inp" id="r${i}" maxlength="140" placeholder="${['Prompts: I always...','Safety: I never...','Checking: I always verify...'][i]}" value="${esc(r[i])}">`).join('')}
-   <label class="f">My golden rule</label><input class="inp" id="rg" maxlength="140" placeholder="The one sentence I want to remember" value="${esc(gold)}">
-   <div class="row"><button class="primary" id="lk">Seal my rulebook</button></div><div class="fb"></div>`;
-  $('#lk',el).onclick=()=>{
-    const v=[0,1,2].map(i=>$('#r'+i,el).value.trim()), g=$('#rg',el).value.trim();
-    if(v.some(x=>x.length<8)||g.length<8){ fb(el,false,'Each rule needs a few words, at least a short sentence.'); return; }
-    S.ans.rules=v; S.ans.golden=g; save(); fb(el,true,'Sealed! Press Next for your certificate.'); burst($('#lk',el)); api.done(25);
+/* Midpoint Recap Cards */
+T.recap_cards = (st,el,api) => {
+  el.innerHTML = `
+    <span class="chip recap">⚡ Halfway Power Review</span>
+    <h3>${st.title}</h3>
+    <p class="muted">You conquered the first half! Here are the 4 superpowers you unlocked:</p>
+    <div class="grid">
+      ${st.cards.map(c => `
+        <div class="tile">
+          <span class="em">${c.em}</span>
+          <b>${esc(c.t)}</b>
+          <p style="margin:6px 0 0;font-size:0.88rem;color:var(--text)">${esc(c.d)}</p>
+        </div>
+      `).join('')}
+    </div>
+    <div class="row">
+      <button class="primary" id="gotit">Got it! Test My Reflexes →</button>
+    </div>`;
+  $('#gotit',el).onclick = () => {
+    Tone.start(); soundFX.success(); burst($('#gotit',el));
+    api.done(15);
+    advance();
   };
 };
 
-T.break=(st,el,api)=>{
-  const ideas=['Stand up and stretch your arms to the stars ✨','Roll your shoulders 5 times','Drink some water 💧','Look out of the window at something far away','Shake out your hands and wiggle your toes','Take 3 slow deep breaths'];
-  el.innerHTML=`<h3>${st.title}</h3><p class="big">${ideas[Math.floor(Math.random()*ideas.length)]}</p><div class="timer" id="tm">30</div><div class="row" style="justify-content:center"><button class="primary" id="go">Start 30 seconds</button></div><p class="muted" style="text-align:center">Or just press Next to skip.</p>`;
-  let t=30, iv=null;
-  $('#go',el).onclick=e=>{ if(iv) return; e.target.disabled=true; iv=setInterval(()=>{ t--; const tm=$('#tm',el); if(!tm){clearInterval(iv);return;} tm.textContent=t;
-    if(t<=0){ clearInterval(iv); tm.textContent='🌟'; api.done(5); burst(tm); } },1000); };
+/* Midpoint Fast Quiz */
+T.fast_quiz = (st,el,api) => {
+  let currQ = 0, score = 0;
+  const draw = () => {
+    if(currQ >= st.questions.length){
+      el.innerHTML = `
+        <span class="chip recap">⚡ Reflexes Verified</span>
+        <h3>Checkpoint Complete! 🔥</h3>
+        <p class="big">Score: <b>${score} / ${st.questions.length}</b> correct on lightning round!</p>
+        <p class="good">You are fully equipped for the second half: Custom Bots, Safety Shields & Truth Verification.</p>`;
+      soundFX.combo(); burst($('h3',el));
+      api.addStreak(); api.done(30);
+      return;
+    }
+    const q = st.questions[currQ];
+    el.innerHTML = `
+      <span class="chip gold">Lightning Round ${currQ+1} of ${st.questions.length}</span>
+      <h3>${esc(q.q)}</h3>
+      <div class="opts">
+        ${q.opts.map((opt,idx)=>`<button class="opt" data-idx="${idx}">${esc(opt)}</button>`).join('')}
+      </div>
+      <div class="fb"></div>`;
+
+    el.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      Tone.start();
+      const idx = +b.dataset.idx;
+      if(idx === q.a){
+        score++; soundFX.success(); burst(b);
+      } else {
+        soundFX.click();
+      }
+      currQ++;
+      setTimeout(draw, 350);
+    });
+  };
+  draw();
 };
 
-T.toolkit=(st,el)=>{
-  el.innerHTML=`<h3>${st.title}</h3><p class="muted">Tap Copy to grab a phrase. Replace the [brackets] with your own details.</p>${st.items.map((it,i)=>`<div class="tile" style="margin:10px 0"><b>${esc(it[0])}</b><div class="out">${esc(it[1])}</div><button class="ghost small" data-i="${i}">Copy</button></div>`).join('')}`;
-  el.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>copyText(st.items[+b.dataset.i][1],b));
-};
+/* Rapid Redaction */
+T.redact_rapid = (st,el,api) => {
+  const hid = new Set();
+  el.innerHTML = `
+    <h3>${st.q}</h3>
+    <p class="muted">Tap chunks to black them out before sending to an AI.</p>
+    <div class="redact">
+      ${st.tokens.map((t,i)=>`<button class="tok" data-i="${i}">${esc(t[0])}</button>`).join(' ')}
+    </div>
+    <div class="row">
+      <button class="primary" id="chk">Check Shield</button>
+      <button class="ghost" id="reveal">Show Safe Version</button>
+    </div>
+    <div class="fb"></div>`;
 
-T.lab=(st,el,api)=>{
-  const tools=['ChatGPT','Gemini','Claude','Google AI Studio','Other'];
-  let tool='';
-  const copyTxt=()=>(typeof st.copy==='function'?st.copy():st.copy)||st.fallback||'';
-  const min=20;
-  el.innerHTML=`<span class="chip lab">🧪 Live lab</span><h3>${st.title}</h3><p class="muted">${st.goal}</p>
-   <div class="muted">Which tool are you using?</div>
-   <div class="chips" id="tl">${tools.map(t=>`<button class="chipb" data-t="${t}">${t}</button>`).join('')}</div>
-   <p class="muted">Free versions are fine. Account and age rules apply, so check with your teacher first. No access? Your teacher can demo it on their screen.</p>
-   <ol class="labsteps">${st.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
-   ${copyTxt()?`<div class="muted">Prompt to use:</div><div class="out">${esc(copyTxt())}</div><button class="ghost" id="cp">Copy prompt</button>`:''}
-   <h4>${esc(st.ask)}</h4>
-   <textarea id="ta" placeholder="What I noticed..."></textarea>
-   <div class="row"><button class="primary" id="lk">Log my lab result</button><span class="muted" id="ct"></span></div><div class="fb"></div>`;
-  el.querySelectorAll('#tl .chipb').forEach(b=>b.onclick=()=>{ el.querySelectorAll('#tl .chipb').forEach(x=>x.classList.remove('on')); b.classList.add('on'); tool=b.dataset.t; });
-  const cp=$('#cp',el); if(cp) cp.onclick=e=>copyText(copyTxt(),e.target);
-  const ta=$('#ta',el), ct=$('#ct',el);
-  const upd=()=>{ const n=ta.value.trim().length; ct.textContent=n>=min?'Ready ✓':`${n}/${min} characters`; }; ta.oninput=upd; upd();
-  $('#lk',el).onclick=()=>{
-    if(!tool){ fb(el,false,'Pick the tool you used first.'); return; }
-    if(ta.value.trim().length<min){ fb(el,false,'Tell me a bit more about what you saw. A couple of sentences is great.'); return; }
-    S.ans[st.key]=tool+': '+ta.value.trim(); save();
-    fb(el,true,'Lab logged! You just tested this idea for real, which is the best way to learn it.'); burst($('#lk',el)); api.done(25);
+  el.querySelectorAll('.tok').forEach(b => b.onclick = () => {
+    Tone.start(); soundFX.click();
+    const i = +b.dataset.i;
+    if(hid.has(i)){ hid.delete(i); b.classList.remove('hid'); }
+    else { hid.add(i); b.classList.add('hid'); }
+  });
+
+  const check = () => {
+    Tone.start();
+    const correctItems = st.tokens.map((t,i) => t[1] ? i : -1).filter(i => i !== -1);
+    const missed = correctItems.filter(i => !hid.has(i)).length;
+    if(missed === 0){
+      soundFX.combo(); burst($('#chk',el));
+      api.addStreak(); api.done(25);
+      fb(el, true, 'Shields up! You safely censored all identifying info.');
+    } else {
+      soundFX.click();
+      correctItems.forEach(i => {
+        const b = el.querySelector(`.tok[data-i="${i}"]`);
+        if(b) b.classList.add('hid');
+      });
+      api.done(10);
+      fb(el, true, 'Shield completed! Notice how the AI can still answer without names or addresses.');
+    }
+  };
+  $('#chk',el).onclick = check;
+  $('#reveal',el).onclick = () => {
+    st.tokens.forEach((t,i) => {
+      if(t[1]){
+        const b = el.querySelector(`.tok[data-i="${i}"]`);
+        if(b) b.classList.add('hid');
+      }
+    });
+    check();
   };
 };
 
-const LABELS={detailPicks:'Details that improve a prompt',lab10:'Lab: quick answer vs step by step',lab11:'Lab: prompt chain',megaPrompt:'Her pro level prompt',proTech:'Pro technique she will use',lab1:'Lab: autocomplete test',lab2:'Lab: weak vs strong prompt',lab3:'Lab: follow-up refinement',lab4:'Lab: image prompt test',lab5:'Lab: same prompt, two tools',lab6:'Lab: with vs without system instructions',lab7:'Lab: privacy settings hunt',lab8:'Lab: hallucination hunt',lab9:'Lab: quiz me',whatAI:'What is AI? (first answer)',meetAI:'Where she meets AI',trustBefore:'Trust in chatbots at the start (0-10)',wantAI:'Wants AI for',thinkWord:'Does AI "think"?',rw1:'Rewritten space prompt',myPrompt:'Her own real prompt',imgPrompt:'Her image prompt',wantType:'AI type she wants to master',botPrompt:'Her AI helper instructions',botReflect:'Bot test reflection',buildIdea:'Wants to build',neverList:'Her Never Share list',factCheck:'Fact checking picks',doMyself:'What she will always do herself',powerPhrases:'Favorite power phrases',trustAfter:'Trust in chatbots at the end (0-10)',whatAI2:'What AI means now',rules:'Her AI rulebook',golden:'Golden rule'};
+/* Quick Bot Builder */
+T.botbuilder_quick = (st,el,api) => {
+  el.innerHTML = `
+    <h3>${st.title}</h3>
+    <p class="muted">Pick traits to generate your AI Studio System Instructions:</p>
+    <label class="f">Bot Role & Personality</label>
+    <div class="pill-row" id="p-roles">
+      <button class="pill-btn" data-v="Friendly Socratic Study Tutor">📚 Friendly Study Coach</button>
+      <button class="pill-btn" data-v="Sarcastic Sci-Fi Android">🤖 Sarcastic Sci-Fi Android</button>
+      <button class="pill-btn" data-v="Calm Coding Mentor">💻 Calm Coding Mentor</button>
+    </div>
+    <label class="f">Bot Behavior Rule</label>
+    <div class="pill-row" id="p-rules">
+      <button class="pill-btn" data-v="Never give the direct answer; give short questions to guide me.">Guided Hints Only</button>
+      <button class="pill-btn" data-v="Keep answers under 3 punchy sentences with an emoji.">Ultra-Short & Punchy</button>
+      <button class="pill-btn" data-v="Always warn me whenever a fact needs double-checking.">Fact-Check Sentinel</button>
+    </div>
+    <div class="muted" style="margin-top:12px">Compiled System Instructions:</div>
+    <div class="out" id="outp">Select pills above to build your bot prompt!</div>
+    <div class="row">
+      <button class="ghost" id="cp">Copy Prompt</button>
+      <button class="primary" id="saveBot">Save & Deploy 🚀</button>
+    </div>
+    <div class="fb"></div>`;
 
-T.cert=(st,el,api)=>{
-  const a=S.ans, date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  const tb=a.trustBefore, ta=a.trustAfter;
-  el.innerHTML=`<div class="cert" id="cert">
-    <div style="font-size:3rem">🌌</div><h2>Certificate of Cosmic AI Literacy</h2><p class="muted">This certifies that</p>
-    <div class="nm">${esc(S.name||'Space Explorer')}</div>
-    <p>completed all ${MISSIONS.length} missions of the Cosmic AI Academy</p>
-    <p class="big">Rank: <b style="color:var(--gold)">${rank()}</b> · ${S.xp} XP</p>
-    ${a.golden?`<div class="quote">Golden rule: ${esc(a.golden)}</div>`:''}
-    ${a.powerPhrases?`<p class="muted">Power phrases: ${esc(a.powerPhrases.join('  '))}</p>`:''}
-    ${(tb!=null&&ta!=null)?`<p class="muted">Trust in chatbots: ${tb}/10 → ${ta}/10</p>`:''}
-    <p class="muted">${date}</p></div>
-   <div class="row"><button class="primary" id="pr">🖨️ Print or save as PDF</button><button class="ghost" id="rv">Show all my answers</button><button class="ghost danger" id="rs">New student (clear everything)</button></div>
-   <dl class="review" id="review" hidden></dl>`;
-  burst($('#cert',el)); api.done(30);
-  $('#pr',el).onclick=()=>window.print();
-  $('#rv',el).onclick=()=>{
-    const r=$('#review',el); r.hidden=!r.hidden;
-    r.innerHTML=Object.keys(LABELS).filter(k=>a[k]!=null&&a[k]!=='').map(k=>{ const v=Array.isArray(a[k])?a[k].join('\n'):a[k]; return `<dt>${esc(LABELS[k])}</dt><dd>${esc(v)}</dd>`; }).join('')||'<dd>No answers yet.</dd>';
+  let role = "Helpful Study Guide";
+  let rule = "Never give direct answers; offer guiding hints.";
+  const updatePrompt = () => {
+    const text = `You are an expert ${role}.\nRule: ${rule}\nAlways maintain a supportive, ADHD-friendly conversational flow.`;
+    $('#outp',el).textContent = text;
+    return text;
   };
-  $('#rs',el).onclick=()=>{ if(confirm('Clear all progress and answers for a new student?')){ S=fresh(); save(); render(); } };
+
+  el.querySelectorAll('#p-roles .pill-btn').forEach(btn => btn.onclick = () => {
+    soundFX.click();
+    el.querySelectorAll('#p-roles .pill-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    role = btn.dataset.v;
+    updatePrompt();
+  });
+  el.querySelectorAll('#p-rules .pill-btn').forEach(btn => btn.onclick = () => {
+    soundFX.click();
+    el.querySelectorAll('#p-rules .pill-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    rule = btn.dataset.v;
+    updatePrompt();
+  });
+
+  updatePrompt();
+  $('#cp',el).onclick = e => copyText(updatePrompt(), e.target);
+  $('#saveBot',el).onclick = () => {
+    Tone.start();
+    S.ans[st.key] = updatePrompt(); save();
+    soundFX.success(); burst($('#saveBot',el));
+    api.addStreak(); api.done(25);
+    fb(el, true, 'System instructions saved! You can paste this right into Google AI Studio.');
+  };
 };
 
-/* ================= engine ================= */
-const cur=()=>MISSIONS[S.m].steps[S.s];
-const sid=()=>S.m+'-'+S.s;
-const totalSteps=MISSIONS.reduce((n,m)=>n+m.steps.length,0);
+/* Quick Rulebook */
+T.rules_quick = (st,el,api) => {
+  const r = S.ans.rules || [
+    'I always include Role, Task, Context, and Format in my prompts.',
+    'I never paste passwords, addresses, or private friend chats.',
+    'I always double-check cited links and statistics before believing them.'
+  ];
+  el.innerHTML = `
+    <h3>${st.title}</h3>
+    <p class="muted">Three golden rules for your personal AI playbook:</p>
+    <div class="tile" style="margin-bottom:8px"><b>1. Prompt Power:</b> ${esc(r[0])}</div>
+    <div class="tile" style="margin-bottom:8px"><b>2. Privacy Shield:</b> ${esc(r[1])}</div>
+    <div class="tile" style="margin-bottom:12px"><b>3. Truth Radar:</b> ${esc(r[2])}</div>
+    <div class="row">
+      <button class="primary" id="seal">Seal My Rulebook 📜</button>
+    </div>
+    <div class="fb"></div>`;
+
+  $('#seal',el).onclick = () => {
+    Tone.start(); soundFX.combo(); burst($('#seal',el));
+    S.ans.rules = r; save();
+    api.done(25);
+    fb(el, true, 'Rulebook sealed! Your graduation certificate is ready next.');
+  };
+};
+
+/* Certificate */
+T.cert = (st,el,api) => {
+  const date = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  el.innerHTML = `
+    <div class="cert" id="cert">
+      <div style="font-size:3.2rem">🎓🌌</div>
+      <h2>Certificate of Cosmic AI Mastery</h2>
+      <p class="muted">This certifies that</p>
+      <div class="nm">${esc(S.name || 'Cosmic Pioneer')}</div>
+      <p>has mastered Prompt Crafting, AI Safety, Truth Verification, and AI Studio Workflows</p>
+      <p class="big">Rank: <b style="color:var(--gold)">${rank()}</b> · ${S.xp} Total XP</p>
+      <div class="quote">Status: Certified Prompt Engineer & Independent AI Thinker</div>
+      <p class="muted">${date}</p>
+    </div>
+    <div class="row" style="margin-top:20px;justify-content:center">
+      <button class="primary" id="pr">🖨️ Print or Save as PDF</button>
+      <button class="ghost danger" id="rs">Restart for New Student</button>
+    </div>`;
+  burst($('#cert',el)); soundFX.combo(); api.done(50);
+  $('#pr',el).onclick = () => window.print();
+  $('#rs',el).onclick = () => {
+    if(confirm('Start fresh for a new student?')){
+      S = fresh(); save(); render();
+    }
+  };
+};
+
+/* ================= Engine & Flow ================= */
+const cur = () => MISSIONS[S.m].steps[S.s];
+const sid = () => S.m + '-' + S.s;
 
 function makeApi(){
-  const id=sid();
-  return { done(xp){ if(!S.done[id]){ const before=level(); S.done[id]=1; S.xp+=xp; save(); renderHud(); renderMap(); renderDots(); floatXP('+'+xp+' XP'); if(level()>before) setTimeout(()=>floatXP('Level up! ⭐'),500); } updateNav(); } };
+  const id = sid();
+  return {
+    done(xp){
+      if(!S.done[id]){
+        const before = level();
+        S.done[id] = 1;
+        S.xp += xp;
+        save();
+        renderHud();
+        renderMap();
+        renderDots();
+        floatXP(`+${xp} XP`);
+        if(level() > before) setTimeout(()=>floatXP('Level Up! ⭐'), 500);
+      }
+    },
+    addStreak(){
+      S.streak = (S.streak || 0) + 1;
+      save();
+      renderHud();
+    }
+  };
 }
+
 function renderHud(){
-  $('#lvl').textContent='Lv '+level()+' · '+rank(); $('#xp').textContent=S.xp+' XP'; $('#xpfill').style.width=(S.xp%100)+'%';
+  $('#lvl').textContent = 'Lv ' + level() + ' · ' + rank();
+  $('#xp').textContent = S.xp + ' XP';
+  $('#xpfill').style.width = (S.xp % 100) + '%';
+  $('#streak').textContent = `🔥 ${S.streak||0} streak`;
 }
+
 function renderMap(){
-  $('#map').innerHTML=MISSIONS.map((m,i)=>{
-    const n=m.steps.filter((_,k)=>S.done[i+'-'+k]).length, fin=n===m.steps.length;
-    return `<button class="planet ${i===S.m?'cur':''} ${fin?'fin':''}" data-i="${i}"><span class="ic">${fin?'✅':m.icon}</span><span>${i+1}. ${m.name}<small>${n}/${m.steps.length} steps</small></span></button>`;
+  $('#map').innerHTML = MISSIONS.map((m,i)=>{
+    const n = m.steps.filter((_,k)=>S.done[i+'-'+k]).length;
+    const fin = n === m.steps.length;
+    const specialClass = m.isRecap ? 'special' : '';
+    return `
+      <button class="planet ${i===S.m?'cur':''} ${fin?'fin':''} ${specialClass}" data-i="${i}">
+        <span class="ic">${fin ? '✅' : m.icon}</span>
+        <span>${i+1}. ${m.name}<small>${n}/${m.steps.length} done</small></span>
+      </button>`;
   }).join('');
-  document.querySelectorAll('.planet').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; const first=MISSIONS[i].steps.findIndex((_,k)=>!S.done[i+'-'+k]); S.m=i; S.s=first<0?0:first; save(); render(); });
+
+  document.querySelectorAll('.planet').forEach(b => b.onclick = () => {
+    Tone.start(); soundFX.click();
+    const i = +b.dataset.i;
+    S.m = i; S.s = 0; save(); render();
+  });
 }
+
 function renderDots(){
-  $('#dots').innerHTML=MISSIONS[S.m].steps.map((_,k)=>`<i class="${k===S.s?'c':(S.done[S.m+'-'+k]?'d':'')}"></i>`).join('');
+  $('#dots').innerHTML = MISSIONS[S.m].steps.map((_,k)=>`
+    <i class="${k===S.s?'c':(S.done[S.m+'-'+k]?'d':'')}" data-s="${k}" title="Step ${k+1}"></i>
+  `).join('');
+  elDots = document.querySelectorAll('#dots i');
+  elDots.forEach(d => d.onclick = () => {
+    Tone.start(); soundFX.click();
+    S.s = +d.dataset.s; save(); render();
+  });
 }
+
 function renderTeacher(){
-  const box=$('#teacher'); box.hidden=!S.teacher; if(!S.teacher) return;
-  const M=MISSIONS[S.m], st=cur();
-  box.innerHTML=`👩‍🏫 <b>Teacher view · Mission ${S.m+1}</b><br>${S.s===0?esc(M.tip):'<span class="muted">Mission tip is shown on the first step of each mission.</span>'}${st.tt?`<br><b>Discuss:</b> ${esc(st.tt)}`:''}`;
+  const box = $('#teacher');
+  box.hidden = !S.teacher;
+  if(!S.teacher) return;
+  const M = MISSIONS[S.m];
+  box.innerHTML = `👩‍🏫 <b>Teacher View · Mission ${S.m+1}: ${M.name}</b><br>${esc(M.tip)}`;
 }
+
 function updateNav(){
-  const st=cur(), last=S.m===MISSIONS.length-1&&S.s===MISSIONS[S.m].steps.length-1;
-  $('#next').hidden=last; $('#back').disabled=(S.m===0&&S.s===0);
-  $('#next').disabled=!(S.done[sid()]||PASSIVE.has(st.t));
+  const isLast = S.m === MISSIONS.length-1 && S.s === MISSIONS[S.m].steps.length-1;
+  $('#next').hidden = isLast;
+  $('#skip').hidden = isLast;
+  $('#back').disabled = (S.m === 0 && S.s === 0);
+  // UNBLOCKED: 'Next' is NEVER disabled! Students can always move ahead.
+  $('#next').disabled = false;
 }
+
 function render(){
-  document.body.classList.toggle('calm',!!S.calm);
-  $('#calmBtn').classList.toggle('on',!!S.calm); $('#teachBtn').classList.toggle('on',!!S.teacher);
-  const M=MISSIONS[S.m], st=cur();
-  const card=$('#card');
-  card.style.animation='none'; void card.offsetWidth; card.style.animation='';
-  card.innerHTML=`<span class="chip">Mission ${S.m+1} · ${M.icon} ${esc(M.name)}</span><p class="goal">Goal: ${esc(M.goal)} · Step ${S.s+1} of ${M.steps.length}</p><div id="body"></div>`;
-  T[st.t](st,$('#body'),makeApi());
+  document.body.classList.toggle('calm', !!S.calm);
+  $('#calmBtn').classList.toggle('on', !!S.calm);
+  $('#teachBtn').classList.toggle('on', !!S.teacher);
+
+  const M = MISSIONS[S.m], st = cur();
+  const card = $('#card');
+  card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+
+  const badgeClass = M.isRecap ? 'chip recap' : 'chip';
+  card.innerHTML = `
+    <div class="card-header-bar">
+      <span class="${badgeClass}">${M.icon} Mission ${S.m+1}: ${esc(M.name)}</span>
+      <span class="muted" style="font-size:0.85rem">Step ${S.s+1} of ${M.steps.length}</span>
+    </div>
+    <p class="goal">${esc(M.goal)}</p>
+    <div id="body"></div>`;
+
+  T[st.t](st, $('#body'), makeApi());
   renderHud(); renderMap(); renderDots(); renderTeacher(); updateNav();
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({top:0, behavior:'smooth'});
 }
+
 function advance(){
-  const M=MISSIONS[S.m];
-  if(S.s<M.steps.length-1){ S.s++; save(); render(); return; }
-  S.xp+=25; save(); renderHud();
-  const nm=MISSIONS[S.m+1]; if(!nm) return;
-  overlay(`<div class="bigicon">${M.icon}</div><h2>Mission ${S.m+1} complete!</h2><p>+25 XP bonus<br>Next stop: <b>${nm.icon} ${esc(nm.name)}</b></p>`,'Fly there 🚀',()=>{ S.m++; S.s=0; save(); render(); });
+  Tone.start(); soundFX.click();
+  const M = MISSIONS[S.m];
+  if(S.s < M.steps.length - 1){
+    S.s++; save(); render(); return;
+  }
+  // Mission finished!
+  S.xp += 25; save(); renderHud();
+  const nm = MISSIONS[S.m+1];
+  if(!nm) return;
+
+  overlay(`
+    <div class="bigicon">${M.icon}</div>
+    <h2>Mission ${S.m+1} Cleared!</h2>
+    <p>+25 XP Mission Bonus awarded!<br>Up next: <b>${nm.icon} ${esc(nm.name)}</b></p>
+  `, 'Fly Ahead 🚀', () => {
+    S.m++; S.s = 0; save(); render();
+  });
 }
-$('#next').onclick=()=>{
-  const st=cur();
-  if(PASSIVE.has(st.t)&&!S.done[sid()]){ S.done[sid()]=1; S.xp+=2; save(); }
+
+$('#next').onclick = () => {
+  const id = sid();
+  if(!S.done[id]){
+    S.done[id] = 1;
+    S.xp += 5;
+    save();
+  }
   advance();
 };
-$('#back').onclick=()=>{
-  if(S.s>0) S.s--; else if(S.m>0){ S.m--; S.s=MISSIONS[S.m].steps.length-1; } else return;
+
+$('#skip').onclick = () => {
+  Tone.start(); soundFX.click();
+  advance();
+};
+
+$('#back').onclick = () => {
+  Tone.start(); soundFX.click();
+  if(S.s > 0) S.s--;
+  else if(S.m > 0){
+    S.m--; S.s = MISSIONS[S.m].steps.length - 1;
+  }
   save(); render();
 };
-$('#calmBtn').onclick=()=>{ S.calm=!S.calm; save(); render(); };
-$('#teachBtn').onclick=()=>{ S.teacher=!S.teacher; save(); render(); };
 
-/* ================= starry sky ================= */
+$('#calmBtn').onclick = () => { S.calm = !S.calm; save(); render(); };
+$('#teachBtn').onclick = () => { S.teacher = !S.teacher; save(); render(); };
+
+/* Resume / Jump Directly to Second Half */
+$('#resumeBtn').onclick = () => {
+  Tone.start(); soundFX.combo();
+  overlay(`
+    <div class="bigicon">⚡</div>
+    <h2>Second-Half Fast Track</h2>
+    <p>Jump straight into where your student left off!</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+      <button class="primary" id="goRecap">Play Halftime Recap & Quiz ⚡</button>
+      <button class="ghost" id="goMission5">Jump directly to Mission 5 (AI Studio) 🛰️</button>
+    </div>
+  `, 'Close', null);
+
+  const box = $('.overlay .box');
+  $('#goRecap', box).onclick = () => {
+    $('.overlay').remove();
+    S.m = 4; S.s = 0; save(); render();
+  };
+  $('#goMission5', box).onclick = () => {
+    $('.overlay').remove();
+    S.m = 5; S.s = 0; save(); render();
+  };
+};
+
+/* ================= Starry Sky Ambient Background ================= */
 (function(){
-  const c=$('#sky'), x=c.getContext('2d'); let w=0,h=0,stars=[],shoot=null;
-  function size(){ w=c.width=innerWidth; h=c.height=innerHeight;
-    stars=Array.from({length:Math.min(220,Math.floor(w*h/7000))},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.4+.2,p:Math.random()*6.28,s:Math.random()*.02+.005})); }
-  function frame(){
-    x.clearRect(0,0,w,h); const calm=document.body.classList.contains('calm');
-    for(const s of stars){ s.p+=s.s; x.globalAlpha=calm?.65:.45+.5*Math.sin(s.p); x.fillStyle='#fff'; x.beginPath(); x.arc(s.x,s.y,s.r,0,6.283); x.fill(); }
-    if(!calm&&!shoot&&Math.random()<.003) shoot={x:Math.random()*w*.8,y:Math.random()*h*.4,l:0};
-    if(shoot){ x.globalAlpha=1-shoot.l/45; x.strokeStyle='#cfe8ff'; x.lineWidth=2; x.beginPath(); x.moveTo(shoot.x,shoot.y); x.lineTo(shoot.x-40,shoot.y-18); x.stroke(); shoot.x+=14; shoot.y+=6; if(++shoot.l>45) shoot=null; }
-    x.globalAlpha=1; requestAnimationFrame(frame);
+  const c = $('#sky'), x = c.getContext('2d');
+  let w = 0, h = 0, stars = [];
+  function size(){
+    w = c.width = innerWidth; h = c.height = innerHeight;
+    stars = Array.from({length: Math.min(180, Math.floor(w*h/8000))}, () => ({
+      x: Math.random()*w, y: Math.random()*h,
+      r: Math.random()*1.3 + 0.3,
+      p: Math.random()*6.28,
+      s: Math.random()*0.02 + 0.005
+    }));
   }
-  addEventListener('resize',size); size(); frame();
+  function frame(){
+    x.clearRect(0,0,w,h);
+    const calm = document.body.classList.contains('calm');
+    for(const s of stars){
+      s.p += s.s;
+      x.globalAlpha = calm ? 0.6 : (0.4 + 0.5 * Math.sin(s.p));
+      x.fillStyle = '#fff';
+      x.beginPath();
+      x.arc(s.x, s.y, s.r, 0, 6.283);
+      x.fill();
+    }
+    x.globalAlpha = 1;
+    requestAnimationFrame(frame);
+  }
+  addEventListener('resize', size);
+  size(); frame();
 })();
 
 render();
